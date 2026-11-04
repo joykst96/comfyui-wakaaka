@@ -14,7 +14,9 @@
 git clone https://github.com/joykst96/comfyui-wakaaka
 ```
 
-ComfyUI Manager의 "Install via Git URL"에 같은 주소를 넣어도 된다. 업데이트는 그 폴더에서 `git pull`.
+업데이트는 그 폴더에서 `git pull`. ComfyUI 레지스트리(Manager의 노드 검색)에는 올리지 않는다.
+
+ComfyUI Manager의 "Install via Git URL"에 같은 주소를 넣어도 된다. 다만 최신 Manager는 이 기능이 기본으로 꺼져 있어서, `ComfyUI/user/__manager/config.ini`의 `[default]`에 `allow_git_url_install = true`를 넣고 ComfyUI를 다시 시작해야 한다. ComfyUI가 루프백 주소(`127.0.0.1` 등)로만 열려 있을 때만 동작한다(Manager README "Dedicated install flags"). 예전 버전의 `security_level = weak`로는 더 이상 풀리지 않는다.
 
 개발할 때는 다른 곳에 clone하고 `custom_nodes` 아래에 링크로 연결해도 된다(Windows는 junction).
 
@@ -41,6 +43,11 @@ New-Item -ItemType Junction -Path <ComfyUI>\custom_nodes\comfyui-wakaaka -Target
 `wildcard`나 `seed`를 다른 노드에서 링크로 받으면 큐에 넣을 때 값을 알 수 없어 실행할 때 채운다. 이때도 PNG 워크플로에는 남지만, 화면의 text는 실행이 끝난 뒤에 바뀐다.
 
 ## 설정 (ComfyUI 설정 → Wakaaka)
+
+전개 모드와 서버 주소는 노드 위젯이 아니라 ComfyUI 설정 창에 있다. 두 모드는 결과가 같아서 워크플로마다 다르게 둘 이유가 없기 때문이다.
+
+- 여는 곳: 왼쪽 아래 톱니바퀴(설정) → 왼쪽 목록 아래쪽 "기타"의 **Wakaaka** → "노드" 아래 **전개 모드**, **서버 주소**
+- 설정 창 위쪽 검색에 `wakaaka`나 `전개 모드`를 쳐도 된다.
 
 | 설정 | 기본값 | 내용 |
 |---|---|---|
