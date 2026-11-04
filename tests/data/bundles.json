@@ -1,0 +1,4269 @@
+{
+  "scene preset": {
+    "format": 1,
+    "root": "G5JHctEc2FHW",
+    "lock": {
+      "2ql4WhqEukww": "2ql4WhqEukww",
+      "3AfHr5bQhxyu": "3AfHr5bQhxyu",
+      "4dumZtY9uORP": "4dumZtY9uORP",
+      "6WgMl1IsEGkv": "6WgMl1IsEGkv",
+      "6wrNWQSKtLoN": "6wrNWQSKtLoN",
+      "7mgRcxWZAKf6": "7mgRcxWZAKf6",
+      "8WYL8kQLvXff": "8WYL8kQLvXff",
+      "AiUlofl5Z8Vg": "AiUlofl5Z8Vg",
+      "DJ8BtrkrUYM7": "DJ8BtrkrUYM7",
+      "FN9tt6pp79AX": "FN9tt6pp79AX",
+      "G5JHctEc2FHW": "G5JHctEc2FHW",
+      "HPmOb3be7LWW": "HPmOb3be7LWW",
+      "LhWG0KbuVrJ9": "LhWG0KbuVrJ9",
+      "M4EpOnelZ1ty": "M4EpOnelZ1ty",
+      "NMeZ25iBuJ7S": "NMeZ25iBuJ7S",
+      "NfdY6ff3Upld": "NfdY6ff3Upld",
+      "PWcepwBDba4u": "PWcepwBDba4u",
+      "SQfO8AQGumPx": "SQfO8AQGumPx",
+      "T5oh3daxPyzP": "T5oh3daxPyzP",
+      "TE1inDHBX1om": "TE1inDHBX1om",
+      "TQM89J8e39JF": "TQM89J8e39JF",
+      "U69tfux6PKRm": "U69tfux6PKRm",
+      "VMVdJQFfa41M": "VMVdJQFfa41M",
+      "WO54nzdxlsMF": "WO54nzdxlsMF",
+      "XqV4ESlZDccB": "XqV4ESlZDccB",
+      "dERJjw30ox2B": "dERJjw30ox2B",
+      "dFGF6UGl26xd": "dFGF6UGl26xd",
+      "eDseZ1BAq2gd": "eDseZ1BAq2gd",
+      "eJuxkTkltgN4": "eJuxkTkltgN4",
+      "hRdLa94rkn1c": "hRdLa94rkn1c",
+      "iYszrEPwYKuF": "iYszrEPwYKuF",
+      "jjuzxA0Xzvce": "jjuzxA0Xzvce",
+      "jw4Zzoloa4Hm": "jw4Zzoloa4Hm",
+      "tAOQKxWPGytk": "tAOQKxWPGytk",
+      "vVJGdrPyxgTM": "vVJGdrPyxgTM",
+      "xGjME5xzHwgH": "xGjME5xzHwgH",
+      "y8TWL36fGchy": "y8TWL36fGchy",
+      "ys1kb7pjyQHC": "ys1kb7pjyQHC"
+    },
+    "docs": {
+      "2ql4WhqEukww": {
+        "schema": 1,
+        "name": "reimu set",
+        "description": "하쿠레이 레이무 + 신사 또는 자연",
+        "items": [
+          {
+            "id": "yK8f",
+            "text": "hakurei reimu, touhou, red bow, detached sleeves, {hakurei shrine|${w:FN9tt6pp79AX}}"
+          }
+        ]
+      },
+      "3AfHr5bQhxyu": {
+        "schema": 1,
+        "name": "miku set",
+        "description": "하츠네 미쿠 + 대표 의상 또는 교복(선택지 안의 참조)",
+        "items": [
+          {
+            "id": "It0q",
+            "text": "hatsune miku, vocaloid, twintails, aqua hair, {detached sleeves, necktie|${w:HPmOb3be7LWW}}"
+          }
+        ]
+      },
+      "4dumZtY9uORP": {
+        "schema": 1,
+        "name": "location",
+        "description": "장소 종류를 먼저 고르고 그 안에서 하나",
+        "items": [
+          {
+            "id": "Ezqf",
+            "ref": {
+              "wildcard": "8WYL8kQLvXff"
+            },
+            "w": 3
+          },
+          {
+            "id": "DGU0",
+            "ref": {
+              "wildcard": "TQM89J8e39JF"
+            },
+            "w": 2
+          },
+          {
+            "id": "LMft",
+            "ref": {
+              "wildcard": "FN9tt6pp79AX"
+            },
+            "w": 3
+          },
+          {
+            "id": "5WjP",
+            "ref": {
+              "wildcard": "XqV4ESlZDccB"
+            },
+            "w": 2
+          },
+          {
+            "id": "09kr",
+            "ref": {
+              "wildcard": "PWcepwBDba4u"
+            }
+          }
+        ]
+      },
+      "6WgMl1IsEGkv": {
+        "schema": 1,
+        "name": "hair length",
+        "description": "머리 길이",
+        "items": [
+          {
+            "id": "bm6Y",
+            "text": "long hair",
+            "w": 10
+          },
+          {
+            "id": "iRyZ",
+            "text": "short hair",
+            "w": 7
+          },
+          {
+            "id": "Qamp",
+            "text": "very long hair",
+            "w": 5
+          },
+          {
+            "id": "AJ4I",
+            "text": "medium hair",
+            "w": 3
+          },
+          {
+            "id": "WF6I",
+            "text": "very short hair"
+          },
+          {
+            "id": "TWBY",
+            "text": "absurdly long hair"
+          },
+          {
+            "id": "vWtt",
+            "text": "alternate hair length"
+          },
+          {
+            "id": "mDlk",
+            "text": "official alternate hair length"
+          }
+        ]
+      },
+      "6wrNWQSKtLoN": {
+        "schema": 1,
+        "name": "lighting",
+        "description": "조명",
+        "items": [
+          {
+            "id": "ni26",
+            "text": "shadow",
+            "w": 10
+          },
+          {
+            "id": "A7Xr",
+            "text": "glowing",
+            "w": 9
+          },
+          {
+            "id": "uIIj",
+            "text": "sunlight",
+            "w": 8
+          },
+          {
+            "id": "0WSc",
+            "text": "light particles",
+            "w": 7
+          },
+          {
+            "id": "379O",
+            "text": "lens flare",
+            "w": 6
+          },
+          {
+            "id": "OEgx",
+            "text": "backlighting",
+            "w": 5
+          },
+          {
+            "id": "VVNr",
+            "text": "blurry foreground",
+            "w": 5
+          },
+          {
+            "id": "oP7z",
+            "text": "glint",
+            "w": 5
+          },
+          {
+            "id": "xd9i",
+            "text": "light rays",
+            "w": 5
+          },
+          {
+            "id": "wYj8",
+            "text": "shade",
+            "w": 4
+          },
+          {
+            "id": "dGE5",
+            "text": "dark",
+            "w": 3
+          },
+          {
+            "id": "STRr",
+            "text": "dappled sunlight",
+            "w": 3
+          },
+          {
+            "id": "tiku",
+            "text": "sunbeam",
+            "w": 3
+          },
+          {
+            "id": "zqvD",
+            "text": "sidelighting",
+            "w": 3
+          },
+          {
+            "id": "H0xc",
+            "text": "spotlight",
+            "w": 2
+          }
+        ]
+      },
+      "7mgRcxWZAKf6": {
+        "schema": 1,
+        "name": "headwear",
+        "description": "모자, 머리장식",
+        "items": [
+          {
+            "id": "WoSA",
+            "text": "hair ornament",
+            "w": 10
+          },
+          {
+            "id": "6uAa",
+            "text": "hat",
+            "w": 9
+          },
+          {
+            "id": "VD0f",
+            "text": "hair ribbon",
+            "w": 6
+          },
+          {
+            "id": "6ZWN",
+            "text": "hair bow",
+            "w": 6
+          },
+          {
+            "id": "4b1e",
+            "text": "hairband",
+            "w": 6
+          },
+          {
+            "id": "ov9g",
+            "text": "hairclip",
+            "w": 5
+          },
+          {
+            "id": "5WUr",
+            "text": "halo",
+            "w": 5
+          },
+          {
+            "id": "ok2y",
+            "text": "cat ears",
+            "w": 4
+          },
+          {
+            "id": "02DB",
+            "text": "hair flower",
+            "w": 4
+          },
+          {
+            "id": "U7v8",
+            "text": "black hat",
+            "w": 3
+          },
+          {
+            "id": "Ztoh",
+            "text": "fake animal ears",
+            "w": 3
+          },
+          {
+            "id": "lmgz",
+            "text": "maid headdress",
+            "w": 3
+          },
+          {
+            "id": "8boF",
+            "text": "mask",
+            "w": 3
+          },
+          {
+            "id": "2Z0n",
+            "text": "white hat",
+            "w": 3
+          },
+          {
+            "id": "YF2K",
+            "text": "beret",
+            "w": 3
+          },
+          {
+            "id": "0ic9",
+            "text": "black hairband",
+            "w": 3
+          },
+          {
+            "id": "6oRL",
+            "text": "witch hat",
+            "w": 3
+          },
+          {
+            "id": "Tgva",
+            "text": "headband",
+            "w": 3
+          },
+          {
+            "id": "LaX7",
+            "text": "helmet",
+            "w": 2
+          },
+          {
+            "id": "2KbC",
+            "text": "x hair ornament",
+            "w": 2
+          },
+          {
+            "id": "dKJX",
+            "text": "scrunchie",
+            "w": 2
+          },
+          {
+            "id": "1off",
+            "text": "headgear",
+            "w": 2
+          },
+          {
+            "id": "TCvG",
+            "text": "mob cap",
+            "w": 2
+          },
+          {
+            "id": "JBL0",
+            "text": "hair tubes",
+            "w": 2
+          },
+          {
+            "id": "5PYH",
+            "text": "crown",
+            "w": 2
+          },
+          {
+            "id": "j64F",
+            "text": "veil",
+            "w": 2
+          },
+          {
+            "id": "Z2nR",
+            "text": "tiara",
+            "w": 2
+          },
+          {
+            "id": "DWoy",
+            "text": "red hat",
+            "w": 2
+          },
+          {
+            "id": "uBeh",
+            "text": "hat ribbon",
+            "w": 2
+          },
+          {
+            "id": "B1FA",
+            "text": "hat bow",
+            "w": 2
+          }
+        ]
+      },
+      "8WYL8kQLvXff": {
+        "schema": 1,
+        "name": "indoor",
+        "description": "실내",
+        "items": [
+          {
+            "id": "9ZYW",
+            "text": "indoors",
+            "w": 10
+          },
+          {
+            "id": "LNnd",
+            "text": "window",
+            "w": 6
+          },
+          {
+            "id": "tG9b",
+            "text": "wooden floor",
+            "w": 3
+          },
+          {
+            "id": "7yS1",
+            "text": "tile floor",
+            "w": 2
+          },
+          {
+            "id": "yYDZ",
+            "text": "tatami",
+            "w": 2
+          },
+          {
+            "id": "UCUa",
+            "text": "checkered floor",
+            "w": 2
+          },
+          {
+            "id": "vS95",
+            "text": "train interior"
+          },
+          {
+            "id": "4l7I",
+            "text": "kitchen"
+          },
+          {
+            "id": "8cTs",
+            "text": "stage"
+          },
+          {
+            "id": "vYZC",
+            "text": "doorway"
+          },
+          {
+            "id": "ThVW",
+            "text": "school"
+          },
+          {
+            "id": "w0US",
+            "text": "ceiling"
+          },
+          {
+            "id": "1lCp",
+            "text": "bar \\(place\\)"
+          },
+          {
+            "id": "UtGL",
+            "text": "hallway"
+          },
+          {
+            "id": "McAB",
+            "text": "car interior"
+          },
+          {
+            "id": "90aK",
+            "text": "restaurant"
+          },
+          {
+            "id": "Cees",
+            "text": "locker room"
+          },
+          {
+            "id": "kOGt",
+            "text": "church"
+          },
+          {
+            "id": "NdDM",
+            "text": "reflective floor"
+          },
+          {
+            "id": "ENQX",
+            "text": "cafe"
+          },
+          {
+            "id": "JMe8",
+            "text": "office"
+          },
+          {
+            "id": "Cklk",
+            "text": "concert"
+          },
+          {
+            "id": "Z4j7",
+            "text": "cockpit"
+          },
+          {
+            "id": "AWR3",
+            "text": "loaded interior"
+          },
+          {
+            "id": "rnte",
+            "text": "aquarium"
+          }
+        ]
+      },
+      "AiUlofl5Z8Vg": {
+        "schema": 1,
+        "name": "top",
+        "description": "상의",
+        "items": [
+          {
+            "id": "6FA6",
+            "text": "shirt",
+            "w": 10
+          },
+          {
+            "id": "QtNT",
+            "text": "jacket",
+            "w": 7
+          },
+          {
+            "id": "z6KL",
+            "text": "white shirt",
+            "w": 7
+          },
+          {
+            "id": "4sIi",
+            "text": "black jacket",
+            "w": 4
+          },
+          {
+            "id": "5MPn",
+            "text": "open jacket",
+            "w": 4
+          },
+          {
+            "id": "M56j",
+            "text": "coat",
+            "w": 4
+          },
+          {
+            "id": "mgEv",
+            "text": "black shirt",
+            "w": 4
+          },
+          {
+            "id": "qtLI",
+            "text": "vest",
+            "w": 3
+          },
+          {
+            "id": "LeFn",
+            "text": "crop top",
+            "w": 3
+          },
+          {
+            "id": "DDfX",
+            "text": "sleeveless shirt",
+            "w": 3
+          },
+          {
+            "id": "MLoG",
+            "text": "hoodie",
+            "w": 3
+          },
+          {
+            "id": "MnJz",
+            "text": "white jacket",
+            "w": 3
+          },
+          {
+            "id": "gDMx",
+            "text": "turtleneck",
+            "w": 3
+          },
+          {
+            "id": "MKJx",
+            "text": "capelet",
+            "w": 2
+          },
+          {
+            "id": "B7mc",
+            "text": "dress shirt",
+            "w": 2
+          },
+          {
+            "id": "FPaU",
+            "text": "blue shirt",
+            "w": 2
+          },
+          {
+            "id": "qRhv",
+            "text": "blue jacket",
+            "w": 2
+          },
+          {
+            "id": "HkqD",
+            "text": "cardigan",
+            "w": 2
+          },
+          {
+            "id": "d5cK",
+            "text": "tank top",
+            "w": 2
+          },
+          {
+            "id": "Z5Xh",
+            "text": "red shirt",
+            "w": 2
+          },
+          {
+            "id": "bite",
+            "text": "grey shirt",
+            "w": 2
+          },
+          {
+            "id": "LGVW",
+            "text": "t-shirt",
+            "w": 2
+          },
+          {
+            "id": "7bPa",
+            "text": "black coat",
+            "w": 2
+          },
+          {
+            "id": "q11P",
+            "text": "red jacket",
+            "w": 2
+          },
+          {
+            "id": "pyQV",
+            "text": "hooded jacket",
+            "w": 2
+          },
+          {
+            "id": "NYO5",
+            "text": "cropped jacket",
+            "w": 2
+          },
+          {
+            "id": "PzjR",
+            "text": "black vest",
+            "w": 2
+          },
+          {
+            "id": "poVX",
+            "text": "white coat",
+            "w": 2
+          },
+          {
+            "id": "OPLo",
+            "text": "pink shirt",
+            "w": 2
+          },
+          {
+            "id": "lIQB",
+            "text": "camisole",
+            "w": 2
+          }
+        ]
+      },
+      "DJ8BtrkrUYM7": {
+        "schema": 1,
+        "name": "legwear",
+        "description": "양말, 스타킹",
+        "items": [
+          {
+            "id": "gZWk",
+            "text": "thighhighs",
+            "w": 10
+          },
+          {
+            "id": "hCsv",
+            "text": "pantyhose",
+            "w": 7
+          },
+          {
+            "id": "t8Nx",
+            "text": "socks",
+            "w": 6
+          },
+          {
+            "id": "HqoU",
+            "text": "black thighhighs",
+            "w": 6
+          },
+          {
+            "id": "WmEV",
+            "text": "white thighhighs",
+            "w": 5
+          },
+          {
+            "id": "HiOL",
+            "text": "black pantyhose",
+            "w": 4
+          },
+          {
+            "id": "ioHL",
+            "text": "white socks",
+            "w": 4
+          },
+          {
+            "id": "3Euw",
+            "text": "kneehighs",
+            "w": 3
+          },
+          {
+            "id": "0l64",
+            "text": "black socks",
+            "w": 3
+          },
+          {
+            "id": "2PpQ",
+            "text": "white pantyhose",
+            "w": 2
+          },
+          {
+            "id": "eXZ1",
+            "text": "single thighhigh",
+            "w": 2
+          },
+          {
+            "id": "gNdp",
+            "text": "brown pantyhose",
+            "w": 2
+          },
+          {
+            "id": "MtA4",
+            "text": "asymmetrical legwear",
+            "w": 2
+          },
+          {
+            "id": "eBGb",
+            "text": "thighband pantyhose",
+            "w": 2
+          },
+          {
+            "id": "BN4G",
+            "text": "brown thighhighs"
+          }
+        ]
+      },
+      "FN9tt6pp79AX": {
+        "schema": 1,
+        "name": "nature",
+        "description": "자연",
+        "items": [
+          {
+            "id": "FuZI",
+            "text": "sky",
+            "w": 10
+          },
+          {
+            "id": "sKZm",
+            "text": "water",
+            "w": 7
+          },
+          {
+            "id": "4hTI",
+            "text": "blue sky",
+            "w": 7
+          },
+          {
+            "id": "ZnvO",
+            "text": "ocean",
+            "w": 5
+          },
+          {
+            "id": "zPXK",
+            "text": "beach",
+            "w": 5
+          },
+          {
+            "id": "5587",
+            "text": "moon",
+            "w": 4
+          },
+          {
+            "id": "o3Ey",
+            "text": "cloudy sky",
+            "w": 4
+          },
+          {
+            "id": "oUME",
+            "text": "star \\(sky\\)",
+            "w": 4
+          },
+          {
+            "id": "oru8",
+            "text": "nature",
+            "w": 3
+          },
+          {
+            "id": "MeBJ",
+            "text": "starry sky",
+            "w": 3
+          },
+          {
+            "id": "yTLZ",
+            "text": "forest",
+            "w": 3
+          },
+          {
+            "id": "wHoy",
+            "text": "rock",
+            "w": 2
+          },
+          {
+            "id": "F6ch",
+            "text": "sand",
+            "w": 2
+          },
+          {
+            "id": "Pely",
+            "text": "mountain",
+            "w": 2
+          },
+          {
+            "id": "w7OI",
+            "text": "underwater",
+            "w": 2
+          },
+          {
+            "id": "Eg35",
+            "text": "horizon",
+            "w": 2
+          },
+          {
+            "id": "DA6g",
+            "text": "sun",
+            "w": 2
+          },
+          {
+            "id": "mbga",
+            "text": "onsen",
+            "w": 2
+          },
+          {
+            "id": "33px",
+            "text": "field",
+            "w": 2
+          },
+          {
+            "id": "fZxq",
+            "text": "autumn leaves",
+            "w": 2
+          },
+          {
+            "id": "Tq1x",
+            "text": "crescent moon",
+            "w": 2
+          },
+          {
+            "id": "ny97",
+            "text": "mountainous horizon",
+            "w": 2
+          },
+          {
+            "id": "6N6h",
+            "text": "flower field"
+          },
+          {
+            "id": "oklh",
+            "text": "river"
+          },
+          {
+            "id": "VQGW",
+            "text": "waves"
+          }
+        ]
+      },
+      "G5JHctEc2FHW": {
+        "schema": 1,
+        "name": "scene preset",
+        "description": "장면 프리셋: 품질 + 인물 + 의상 + 액세서리 + 표정 + 자세 + 카메라 + 장소 + 분위기",
+        "items": [
+          {
+            "id": "MZNm",
+            "text": "${w:VMVdJQFfa41M}, ${w:xGjME5xzHwgH}, ${w:hRdLa94rkn1c}, ${w:ys1kb7pjyQHC}, ${w:NfdY6ff3Upld}, ${w:jjuzxA0Xzvce}, ${w:dFGF6UGl26xd}, ${w:4dumZtY9uORP}, ${w:eDseZ1BAq2gd}"
+          }
+        ]
+      },
+      "HPmOb3be7LWW": {
+        "schema": 1,
+        "name": "school uniform",
+        "description": "교복",
+        "items": [
+          {
+            "id": "jnAc",
+            "text": "school uniform",
+            "w": 10
+          },
+          {
+            "id": "bbJW",
+            "text": "serafuku",
+            "w": 6
+          },
+          {
+            "id": "XrJl",
+            "text": "blazer",
+            "w": 3
+          },
+          {
+            "id": "CHDo",
+            "text": "winter uniform",
+            "w": 2
+          },
+          {
+            "id": "jlyJ",
+            "text": "gym uniform",
+            "w": 2
+          },
+          {
+            "id": "XD5W",
+            "text": "black serafuku",
+            "w": 2
+          },
+          {
+            "id": "k7QA",
+            "text": "tracen school uniform",
+            "w": 2
+          },
+          {
+            "id": "J91n",
+            "text": "summer uniform",
+            "w": 2
+          },
+          {
+            "id": "Vtq7",
+            "text": "sailor shirt",
+            "w": 2
+          },
+          {
+            "id": "Lyzl",
+            "text": "gakuran",
+            "w": 2
+          },
+          {
+            "id": "0ht9",
+            "text": "hasu no sora school uniform"
+          },
+          {
+            "id": "bqCk",
+            "text": "kita high school uniform"
+          },
+          {
+            "id": "Vyy4",
+            "text": "mitakihara school uniform"
+          },
+          {
+            "id": "D2w2",
+            "text": "sakuragaoka high school uniform"
+          },
+          {
+            "id": "V6jr",
+            "text": "ooarai school uniform"
+          }
+        ]
+      },
+      "LhWG0KbuVrJ9": {
+        "schema": 1,
+        "name": "weather",
+        "description": "날씨, 시간",
+        "items": [
+          {
+            "id": "xVzB",
+            "text": "day",
+            "w": 10
+          },
+          {
+            "id": "5iox",
+            "text": "cloud",
+            "w": 9
+          },
+          {
+            "id": "HkCP",
+            "text": "night",
+            "w": 6
+          },
+          {
+            "id": "OyHo",
+            "text": "wind",
+            "w": 4
+          },
+          {
+            "id": "u4PY",
+            "text": "breath",
+            "w": 4
+          },
+          {
+            "id": "fY6R",
+            "text": "christmas",
+            "w": 4
+          },
+          {
+            "id": "RQVi",
+            "text": "snow",
+            "w": 4
+          },
+          {
+            "id": "rOTs",
+            "text": "full moon",
+            "w": 3
+          },
+          {
+            "id": "KOJ3",
+            "text": "rain",
+            "w": 3
+          },
+          {
+            "id": "drKM",
+            "text": "falling petals",
+            "w": 3
+          },
+          {
+            "id": "5C1Y",
+            "text": "sunset",
+            "w": 3
+          },
+          {
+            "id": "LgfP",
+            "text": "snowing",
+            "w": 3
+          },
+          {
+            "id": "V1q7",
+            "text": "ice",
+            "w": 3
+          },
+          {
+            "id": "jpK5",
+            "text": "wind lift",
+            "w": 2
+          },
+          {
+            "id": "Z2A6",
+            "text": "snowflakes",
+            "w": 2
+          }
+        ]
+      },
+      "M4EpOnelZ1ty": {
+        "schema": 1,
+        "name": "kaga set",
+        "description": "괄호가 든 캐릭터 태그 예시",
+        "items": [
+          {
+            "id": "5uPQ",
+            "text": "kaga \\(kancolle\\), kantai collection, side ponytail"
+          }
+        ]
+      },
+      "NMeZ25iBuJ7S": {
+        "schema": 1,
+        "name": "framing",
+        "description": "프레이밍",
+        "items": [
+          {
+            "id": "045q",
+            "text": "full body",
+            "w": 10
+          },
+          {
+            "id": "fiLQ",
+            "text": "upper body",
+            "w": 10
+          },
+          {
+            "id": "5GeS",
+            "text": "cowboy shot",
+            "w": 8
+          },
+          {
+            "id": "YgGV",
+            "text": "feet out of frame",
+            "w": 4
+          },
+          {
+            "id": "3cqq",
+            "text": "portrait",
+            "w": 3
+          },
+          {
+            "id": "vlWx",
+            "text": "cropped torso",
+            "w": 2
+          },
+          {
+            "id": "oVMT",
+            "text": "cropped legs",
+            "w": 2
+          },
+          {
+            "id": "lWit",
+            "text": "close-up",
+            "w": 2
+          },
+          {
+            "id": "O6cX",
+            "text": "out of frame",
+            "w": 2
+          },
+          {
+            "id": "O7j9",
+            "text": "foot out of frame",
+            "w": 2
+          },
+          {
+            "id": "ADjf",
+            "text": "head out of frame",
+            "w": 2
+          },
+          {
+            "id": "va4p",
+            "text": "side-by-side"
+          },
+          {
+            "id": "IVIq",
+            "text": "eyes out of frame"
+          },
+          {
+            "id": "MJtb",
+            "text": "time paradox"
+          },
+          {
+            "id": "fkn3",
+            "text": "lower body"
+          }
+        ]
+      },
+      "NfdY6ff3Upld": {
+        "schema": 1,
+        "name": "expression",
+        "description": "표정 1~2개",
+        "select": {
+          "count": [
+            1,
+            2
+          ]
+        },
+        "items": [
+          {
+            "id": "RsAh",
+            "text": "smile",
+            "w": 10
+          },
+          {
+            "id": "rJ60",
+            "text": "blush",
+            "w": 10
+          },
+          {
+            "id": "nejy",
+            "text": "open mouth",
+            "w": 9
+          },
+          {
+            "id": "40Bc",
+            "text": "closed mouth",
+            "w": 7
+          },
+          {
+            "id": "5qw7",
+            "text": "closed eyes",
+            "w": 5
+          },
+          {
+            "id": "PWMP",
+            "text": ":d",
+            "w": 4
+          },
+          {
+            "id": "kWFp",
+            "text": "parted lips",
+            "w": 4
+          },
+          {
+            "id": "YNww",
+            "text": "one eye closed",
+            "w": 4
+          },
+          {
+            "id": "3Pgu",
+            "text": "grin",
+            "w": 3
+          },
+          {
+            "id": "j2sp",
+            "text": ":o",
+            "w": 2
+          },
+          {
+            "id": "GFnm",
+            "text": "expressionless",
+            "w": 2
+          },
+          {
+            "id": "4HOY",
+            "text": ":3",
+            "w": 2
+          },
+          {
+            "id": "tolU",
+            "text": "^_^",
+            "w": 2
+          },
+          {
+            "id": "1TEQ",
+            "text": "frown",
+            "w": 2
+          },
+          {
+            "id": "Oevw",
+            "text": "blush stickers",
+            "w": 2
+          },
+          {
+            "id": "3UoF",
+            "text": "nose blush",
+            "w": 2
+          },
+          {
+            "id": "6t1n",
+            "text": "half-closed eyes",
+            "w": 2
+          },
+          {
+            "id": "bwlQ",
+            "text": "light blush",
+            "w": 2
+          },
+          {
+            "id": "Lhj2",
+            "text": "light smile",
+            "w": 2
+          },
+          {
+            "id": "KDMm",
+            "text": "wavy mouth",
+            "w": 2
+          },
+          {
+            "id": "jf5B",
+            "text": ";d",
+            "w": 2
+          },
+          {
+            "id": "yGjF",
+            "text": ">_<",
+            "w": 2
+          },
+          {
+            "id": "m1Jq",
+            "text": "shaded face"
+          },
+          {
+            "id": "WtuZ",
+            "text": "anger vein"
+          },
+          {
+            "id": "ImRj",
+            "text": "furrowed brow"
+          },
+          {
+            "id": "j4ul",
+            "text": ":<"
+          },
+          {
+            "id": "dffI",
+            "text": "raised eyebrows"
+          },
+          {
+            "id": "9QGE",
+            "text": ":q"
+          },
+          {
+            "id": "o1Dx",
+            "text": "+_+"
+          },
+          {
+            "id": "Hpgk",
+            "text": "serious"
+          },
+          {
+            "id": "LwK6",
+            "text": ":t"
+          },
+          {
+            "id": "U4m1",
+            "text": "pout"
+          },
+          {
+            "id": "VgUQ",
+            "text": "smirk"
+          },
+          {
+            "id": "Vwxw",
+            "text": "=_="
+          },
+          {
+            "id": "v5YQ",
+            "text": "smug"
+          },
+          {
+            "id": "GgTh",
+            "text": ";\\)"
+          },
+          {
+            "id": "LClG",
+            "text": "full-face blush"
+          },
+          {
+            "id": "7mGl",
+            "text": "|_|"
+          },
+          {
+            "id": "nbem",
+            "text": "light frown"
+          },
+          {
+            "id": "FPEm",
+            "text": "triangle mouth"
+          }
+        ]
+      },
+      "PWcepwBDba4u": {
+        "schema": 1,
+        "name": "fantasy place",
+        "description": "판타지 장소",
+        "items": [
+          {
+            "id": "rEUr",
+            "text": "space",
+            "w": 10
+          },
+          {
+            "id": "hkxL",
+            "text": "fantasy",
+            "w": 9
+          },
+          {
+            "id": "1LBg",
+            "text": "planet",
+            "w": 8
+          },
+          {
+            "id": "4f60",
+            "text": "castle",
+            "w": 7
+          },
+          {
+            "id": "jBBb",
+            "text": "ancient egyptian",
+            "w": 5
+          },
+          {
+            "id": "2Ue5",
+            "text": "cyberpunk",
+            "w": 4
+          },
+          {
+            "id": "AhZS",
+            "text": "scarlet devil mansion",
+            "w": 3
+          },
+          {
+            "id": "D2wK",
+            "text": "steampunk",
+            "w": 3
+          },
+          {
+            "id": "7Hue",
+            "text": "floating island",
+            "w": 3
+          },
+          {
+            "id": "QfFk",
+            "text": "victorian",
+            "w": 3
+          },
+          {
+            "id": "XzeP",
+            "text": "medieval",
+            "w": 2
+          },
+          {
+            "id": "qOpG",
+            "text": "temple",
+            "w": 2
+          },
+          {
+            "id": "TFaX",
+            "text": "dungeon",
+            "w": 2
+          },
+          {
+            "id": "zKEt",
+            "text": "hakurei shrine",
+            "w": 2
+          },
+          {
+            "id": "ovMc",
+            "text": "floating rock",
+            "w": 2
+          }
+        ]
+      },
+      "SQfO8AQGumPx": {
+        "schema": 1,
+        "name": "angle",
+        "description": "시점, 앵글",
+        "items": [
+          {
+            "id": "oNz1",
+            "text": "looking at viewer",
+            "w": 10
+          },
+          {
+            "id": "qO7b",
+            "text": "from behind",
+            "w": 3
+          },
+          {
+            "id": "kjrg",
+            "text": "from side",
+            "w": 3
+          },
+          {
+            "id": "G2el",
+            "text": "pov",
+            "w": 2
+          },
+          {
+            "id": "rokI",
+            "text": "profile",
+            "w": 2
+          },
+          {
+            "id": "E29Z",
+            "text": "dutch angle",
+            "w": 2
+          },
+          {
+            "id": "g7al",
+            "text": "from above",
+            "w": 2
+          },
+          {
+            "id": "ELF3",
+            "text": "from below",
+            "w": 2
+          },
+          {
+            "id": "BXg9",
+            "text": "looking up"
+          },
+          {
+            "id": "R92l",
+            "text": "facing viewer"
+          },
+          {
+            "id": "LjnM",
+            "text": "looking ahead"
+          },
+          {
+            "id": "K2xR",
+            "text": "straight-on"
+          },
+          {
+            "id": "f1dj",
+            "text": "pov hands"
+          },
+          {
+            "id": "gjjY",
+            "text": "facing away"
+          },
+          {
+            "id": "nBbM",
+            "text": "upside-down"
+          }
+        ]
+      },
+      "T5oh3daxPyzP": {
+        "schema": 1,
+        "name": "bottom",
+        "description": "하의",
+        "items": [
+          {
+            "id": "Y6Mt",
+            "text": "skirt",
+            "w": 10
+          },
+          {
+            "id": "dBBI",
+            "text": "pleated skirt",
+            "w": 6
+          },
+          {
+            "id": "WTvj",
+            "text": "pants",
+            "w": 6
+          },
+          {
+            "id": "BXj2",
+            "text": "shorts",
+            "w": 5
+          },
+          {
+            "id": "vVGS",
+            "text": "black skirt",
+            "w": 5
+          },
+          {
+            "id": "UQYx",
+            "text": "miniskirt",
+            "w": 4
+          },
+          {
+            "id": "4odZ",
+            "text": "blue skirt",
+            "w": 3
+          },
+          {
+            "id": "Zz7M",
+            "text": "black pants",
+            "w": 3
+          },
+          {
+            "id": "yReV",
+            "text": "black shorts",
+            "w": 3
+          },
+          {
+            "id": "ScxC",
+            "text": "red skirt",
+            "w": 3
+          },
+          {
+            "id": "SS4G",
+            "text": "white skirt",
+            "w": 3
+          },
+          {
+            "id": "sUoN",
+            "text": "plaid skirt",
+            "w": 2
+          },
+          {
+            "id": "uFWI",
+            "text": "frilled skirt",
+            "w": 2
+          },
+          {
+            "id": "QKbz",
+            "text": "green skirt",
+            "w": 2
+          },
+          {
+            "id": "26Bh",
+            "text": "grey skirt",
+            "w": 2
+          },
+          {
+            "id": "AzQ6",
+            "text": "white pants",
+            "w": 2
+          },
+          {
+            "id": "acmE",
+            "text": "blue shorts",
+            "w": 2
+          },
+          {
+            "id": "gJsz",
+            "text": "bike shorts",
+            "w": 2
+          },
+          {
+            "id": "NK00",
+            "text": "skirt set",
+            "w": 2
+          },
+          {
+            "id": "z27D",
+            "text": "pink skirt",
+            "w": 2
+          }
+        ]
+      },
+      "TE1inDHBX1om": {
+        "schema": 1,
+        "name": "eye color",
+        "description": "눈 색",
+        "items": [
+          {
+            "id": "gEp8",
+            "text": "blue eyes",
+            "w": 10
+          },
+          {
+            "id": "Qt9b",
+            "text": "red eyes",
+            "w": 8
+          },
+          {
+            "id": "2NY4",
+            "text": "green eyes",
+            "w": 7
+          },
+          {
+            "id": "G3i8",
+            "text": "purple eyes",
+            "w": 7
+          },
+          {
+            "id": "OMEL",
+            "text": "brown eyes",
+            "w": 7
+          },
+          {
+            "id": "ZN7P",
+            "text": "yellow eyes",
+            "w": 6
+          },
+          {
+            "id": "YgHg",
+            "text": "pink eyes",
+            "w": 4
+          },
+          {
+            "id": "rPNO",
+            "text": "black eyes",
+            "w": 4
+          },
+          {
+            "id": "Cbtn",
+            "text": "grey eyes",
+            "w": 3
+          },
+          {
+            "id": "cLPz",
+            "text": "aqua eyes",
+            "w": 3
+          },
+          {
+            "id": "onuJ",
+            "text": "orange eyes",
+            "w": 3
+          },
+          {
+            "id": "nKU4",
+            "text": "heterochromia",
+            "w": 3
+          },
+          {
+            "id": "0GbC",
+            "text": "multicolored eyes",
+            "w": 2
+          },
+          {
+            "id": "tKUa",
+            "text": "white eyes"
+          },
+          {
+            "id": "oGfU",
+            "text": "alternate eye color"
+          }
+        ]
+      },
+      "TQM89J8e39JF": {
+        "schema": 1,
+        "name": "outdoor",
+        "description": "실외",
+        "items": [
+          {
+            "id": "EWRa",
+            "text": "outdoors",
+            "w": 10
+          },
+          {
+            "id": "9hqa",
+            "text": "pool",
+            "w": 2
+          },
+          {
+            "id": "LNrS",
+            "text": "torii"
+          },
+          {
+            "id": "n9IG",
+            "text": "house"
+          },
+          {
+            "id": "QajS",
+            "text": "poolside"
+          },
+          {
+            "id": "5YfL",
+            "text": "shrine"
+          },
+          {
+            "id": "v1r3",
+            "text": "flight deck"
+          },
+          {
+            "id": "EdoT",
+            "text": "balcony"
+          },
+          {
+            "id": "675z",
+            "text": "veranda"
+          },
+          {
+            "id": "iY1m",
+            "text": "garden"
+          },
+          {
+            "id": "ENuX",
+            "text": "graveyard"
+          },
+          {
+            "id": "tFFI",
+            "text": "summer festival"
+          },
+          {
+            "id": "pxm0",
+            "text": "fountain"
+          },
+          {
+            "id": "kt0r",
+            "text": "lighthouse"
+          },
+          {
+            "id": "NJmg",
+            "text": "porch"
+          }
+        ]
+      },
+      "U69tfux6PKRm": {
+        "schema": 1,
+        "name": "girl base",
+        "description": "여자 캐릭터 외형",
+        "items": [
+          {
+            "id": "3YOv",
+            "text": "1girl, solo, ${w:6WgMl1IsEGkv}, ${w:tAOQKxWPGytk}, ${w:iYszrEPwYKuF}, ${w:TE1inDHBX1om}"
+          }
+        ]
+      },
+      "VMVdJQFfa41M": {
+        "schema": 1,
+        "name": "quality",
+        "description": "품질 태그 전부(뽑힌 순서로 섞임)",
+        "select": {
+          "count": [
+            5,
+            5
+          ]
+        },
+        "items": [
+          {
+            "id": "F3iA",
+            "text": "masterpiece"
+          },
+          {
+            "id": "Y5zy",
+            "text": "best quality"
+          },
+          {
+            "id": "4uU3",
+            "text": "amazing quality"
+          },
+          {
+            "id": "bj4S",
+            "text": "high quality"
+          },
+          {
+            "id": "AYl8",
+            "text": "absurdres"
+          }
+        ]
+      },
+      "WO54nzdxlsMF": {
+        "schema": 1,
+        "name": "footwear",
+        "description": "신발",
+        "items": [
+          {
+            "id": "BxZd",
+            "text": "shoes",
+            "w": 10
+          },
+          {
+            "id": "K433",
+            "text": "boots",
+            "w": 9
+          },
+          {
+            "id": "baos",
+            "text": "high heels",
+            "w": 6
+          },
+          {
+            "id": "vzAY",
+            "text": "black shoes",
+            "w": 6
+          },
+          {
+            "id": "g0Bx",
+            "text": "black boots",
+            "w": 5
+          },
+          {
+            "id": "KxTy",
+            "text": "no shoes",
+            "w": 4
+          },
+          {
+            "id": "F5I5",
+            "text": "thigh boots",
+            "w": 4
+          },
+          {
+            "id": "XGPG",
+            "text": "sneakers",
+            "w": 3
+          },
+          {
+            "id": "rq37",
+            "text": "white shoes",
+            "w": 3
+          },
+          {
+            "id": "7ipV",
+            "text": "brown shoes",
+            "w": 3
+          },
+          {
+            "id": "hW1a",
+            "text": "knee boots",
+            "w": 3
+          },
+          {
+            "id": "vJZk",
+            "text": "loafers",
+            "w": 3
+          },
+          {
+            "id": "2Qxi",
+            "text": "brown boots",
+            "w": 3
+          },
+          {
+            "id": "clms",
+            "text": "red shoes",
+            "w": 3
+          },
+          {
+            "id": "LtmY",
+            "text": "white boots",
+            "w": 3
+          }
+        ]
+      },
+      "XqV4ESlZDccB": {
+        "schema": 1,
+        "name": "city",
+        "description": "도시",
+        "items": [
+          {
+            "id": "ICZ4",
+            "text": "building",
+            "w": 10
+          },
+          {
+            "id": "1Isf",
+            "text": "city",
+            "w": 6
+          },
+          {
+            "id": "JT1O",
+            "text": "road",
+            "w": 5
+          },
+          {
+            "id": "TPBJ",
+            "text": "cityscape",
+            "w": 5
+          },
+          {
+            "id": "P2C7",
+            "text": "architecture",
+            "w": 5
+          },
+          {
+            "id": "RLwS",
+            "text": "east asian architecture",
+            "w": 4
+          },
+          {
+            "id": "jTBk",
+            "text": "power lines",
+            "w": 4
+          },
+          {
+            "id": "wwFi",
+            "text": "lamppost",
+            "w": 4
+          },
+          {
+            "id": "oyky",
+            "text": "bridge",
+            "w": 4
+          },
+          {
+            "id": "3pBt",
+            "text": "utility pole",
+            "w": 4
+          },
+          {
+            "id": "xbN4",
+            "text": "street",
+            "w": 4
+          },
+          {
+            "id": "isDe",
+            "text": "shop",
+            "w": 3
+          },
+          {
+            "id": "1U1C",
+            "text": "tower",
+            "w": 3
+          },
+          {
+            "id": "rton",
+            "text": "city lights",
+            "w": 3
+          },
+          {
+            "id": "d1aj",
+            "text": "rooftop",
+            "w": 3
+          },
+          {
+            "id": "jzMq",
+            "text": "graffiti",
+            "w": 3
+          },
+          {
+            "id": "TLth",
+            "text": "town",
+            "w": 2
+          },
+          {
+            "id": "xpf1",
+            "text": "alley",
+            "w": 2
+          },
+          {
+            "id": "nauS",
+            "text": "real world location",
+            "w": 2
+          },
+          {
+            "id": "acQn",
+            "text": "skyline",
+            "w": 2
+          }
+        ]
+      },
+      "dERJjw30ox2B": {
+        "schema": 1,
+        "name": "traditional",
+        "description": "전통 의상",
+        "items": [
+          {
+            "id": "dEMp",
+            "text": "japanese clothes",
+            "w": 10
+          },
+          {
+            "id": "ZLQk",
+            "text": "kimono",
+            "w": 8
+          },
+          {
+            "id": "Vqbe",
+            "text": "chinese clothes",
+            "w": 6
+          },
+          {
+            "id": "00N4",
+            "text": "obi",
+            "w": 5
+          },
+          {
+            "id": "WsqJ",
+            "text": "china dress",
+            "w": 4
+          },
+          {
+            "id": "pbps",
+            "text": "hakama",
+            "w": 4
+          },
+          {
+            "id": "tGr1",
+            "text": "white kimono",
+            "w": 3
+          },
+          {
+            "id": "Fruv",
+            "text": "hakama skirt",
+            "w": 3
+          },
+          {
+            "id": "94hS",
+            "text": "blue kimono",
+            "w": 3
+          },
+          {
+            "id": "WznG",
+            "text": "nontraditional miko",
+            "w": 3
+          },
+          {
+            "id": "8yBA",
+            "text": "yukata",
+            "w": 2
+          },
+          {
+            "id": "5PW5",
+            "text": "print kimono",
+            "w": 2
+          },
+          {
+            "id": "8isK",
+            "text": "black kimono",
+            "w": 2
+          },
+          {
+            "id": "B2Ud",
+            "text": "haori",
+            "w": 2
+          },
+          {
+            "id": "AxnH",
+            "text": "red kimono",
+            "w": 2
+          }
+        ]
+      },
+      "dFGF6UGl26xd": {
+        "schema": 1,
+        "name": "camera",
+        "description": "프레이밍 + 앵글",
+        "items": [
+          {
+            "id": "zSa8",
+            "text": "${w:NMeZ25iBuJ7S}, ${w:SQfO8AQGumPx}"
+          }
+        ]
+      },
+      "eDseZ1BAq2gd": {
+        "schema": 1,
+        "name": "atmosphere",
+        "description": "조명과 날씨 1~2개",
+        "select": {
+          "count": [
+            1,
+            2
+          ]
+        },
+        "items": [
+          {
+            "id": "SoRH",
+            "ref": {
+              "wildcard": "6wrNWQSKtLoN"
+            },
+            "spread": true
+          },
+          {
+            "id": "P92H",
+            "ref": {
+              "wildcard": "LhWG0KbuVrJ9"
+            },
+            "spread": true
+          }
+        ]
+      },
+      "eJuxkTkltgN4": {
+        "schema": 1,
+        "name": "character pool",
+        "description": "캐릭터 세트 셋과 인기 캐릭터 15명",
+        "items": [
+          {
+            "id": "MlWb",
+            "ref": {
+              "wildcard": "3AfHr5bQhxyu"
+            },
+            "w": 4
+          },
+          {
+            "id": "Qgxj",
+            "ref": {
+              "wildcard": "2ql4WhqEukww"
+            },
+            "w": 4
+          },
+          {
+            "id": "f5N0",
+            "ref": {
+              "wildcard": "M4EpOnelZ1ty"
+            },
+            "w": 2
+          },
+          {
+            "id": "712j",
+            "text": "hatsune miku",
+            "w": 10
+          },
+          {
+            "id": "TbVr",
+            "text": "hakurei reimu",
+            "w": 8
+          },
+          {
+            "id": "xhfN",
+            "text": "kirisame marisa",
+            "w": 8
+          },
+          {
+            "id": "OuM0",
+            "text": "flandre scarlet",
+            "w": 7
+          },
+          {
+            "id": "hhoD",
+            "text": "remilia scarlet",
+            "w": 7
+          },
+          {
+            "id": "NHPs",
+            "text": "izayoi sakuya",
+            "w": 6
+          },
+          {
+            "id": "Dc8s",
+            "text": "artoria pendragon \\(fate\\)",
+            "w": 6
+          },
+          {
+            "id": "kZ36",
+            "text": "komeiji koishi",
+            "w": 6
+          },
+          {
+            "id": "9Jec",
+            "text": "kochiya sanae",
+            "w": 5
+          },
+          {
+            "id": "BWPE",
+            "text": "konpaku youmu",
+            "w": 5
+          },
+          {
+            "id": "Xb9r",
+            "text": "admiral \\(kancolle\\)",
+            "w": 5
+          },
+          {
+            "id": "o6yj",
+            "text": "cirno",
+            "w": 5
+          },
+          {
+            "id": "pDWk",
+            "text": "alice margatroid",
+            "w": 5
+          },
+          {
+            "id": "9nI0",
+            "text": "patchouli knowledge",
+            "w": 5
+          },
+          {
+            "id": "GkMa",
+            "text": "yakumo yukari",
+            "w": 5
+          }
+        ]
+      },
+      "hRdLa94rkn1c": {
+        "schema": 1,
+        "name": "outfit",
+        "description": "의상: 상하의 조합, 드레스, 교복, 전통 의상 중 하나(ref 항목 예시)",
+        "items": [
+          {
+            "id": "WUDe",
+            "text": "${w:AiUlofl5Z8Vg}, ${w:T5oh3daxPyzP}",
+            "w": 4
+          },
+          {
+            "id": "qwyH",
+            "ref": {
+              "wildcard": "vVJGdrPyxgTM"
+            },
+            "w": 3
+          },
+          {
+            "id": "xnGn",
+            "ref": {
+              "wildcard": "HPmOb3be7LWW"
+            },
+            "w": 2
+          },
+          {
+            "id": "Y1Fr",
+            "ref": {
+              "wildcard": "dERJjw30ox2B"
+            }
+          }
+        ]
+      },
+      "iYszrEPwYKuF": {
+        "schema": 1,
+        "name": "hair style",
+        "description": "헤어스타일",
+        "items": [
+          {
+            "id": "GZdz",
+            "text": "hair between eyes",
+            "w": 10
+          },
+          {
+            "id": "6Cqu",
+            "text": "twintails",
+            "w": 8
+          },
+          {
+            "id": "i8cg",
+            "text": "ponytail",
+            "w": 7
+          },
+          {
+            "id": "aPB1",
+            "text": "ahoge",
+            "w": 7
+          },
+          {
+            "id": "3WzV",
+            "text": "sidelocks",
+            "w": 7
+          },
+          {
+            "id": "14h9",
+            "text": "blunt bangs",
+            "w": 5
+          },
+          {
+            "id": "GhAw",
+            "text": "hair bun",
+            "w": 5
+          },
+          {
+            "id": "3krY",
+            "text": "hair over one eye",
+            "w": 5
+          },
+          {
+            "id": "bXKv",
+            "text": "parted bangs",
+            "w": 4
+          },
+          {
+            "id": "m1Tw",
+            "text": "two side up",
+            "w": 4
+          },
+          {
+            "id": "iWUr",
+            "text": "side ponytail",
+            "w": 4
+          },
+          {
+            "id": "Huzu",
+            "text": "hair intakes",
+            "w": 4
+          },
+          {
+            "id": "Zmex",
+            "text": "floating hair",
+            "w": 3
+          },
+          {
+            "id": "vHFq",
+            "text": "double bun",
+            "w": 3
+          },
+          {
+            "id": "dz8b",
+            "text": "swept bangs",
+            "w": 3
+          },
+          {
+            "id": "HtDc",
+            "text": "low twintails",
+            "w": 3
+          },
+          {
+            "id": "i3sp",
+            "text": "wavy hair",
+            "w": 3
+          },
+          {
+            "id": "I2Lv",
+            "text": "alternate hairstyle",
+            "w": 3
+          },
+          {
+            "id": "Mrv1",
+            "text": "one side up",
+            "w": 3
+          },
+          {
+            "id": "NeaX",
+            "text": "bob cut",
+            "w": 3
+          },
+          {
+            "id": "QCB1",
+            "text": "drill hair",
+            "w": 3
+          },
+          {
+            "id": "gcNn",
+            "text": "antenna hair",
+            "w": 3
+          },
+          {
+            "id": "qGGL",
+            "text": "high ponytail",
+            "w": 3
+          },
+          {
+            "id": "9dMz",
+            "text": "spiked hair",
+            "w": 2
+          },
+          {
+            "id": "cVU3",
+            "text": "crossed bangs",
+            "w": 2
+          },
+          {
+            "id": "JfJo",
+            "text": "straight hair",
+            "w": 2
+          },
+          {
+            "id": "FAKk",
+            "text": "single hair bun",
+            "w": 2
+          },
+          {
+            "id": "UwN2",
+            "text": "messy hair",
+            "w": 2
+          },
+          {
+            "id": "vWIv",
+            "text": "short twintails",
+            "w": 2
+          },
+          {
+            "id": "W9pX",
+            "text": "official alternate hairstyle",
+            "w": 2
+          },
+          {
+            "id": "uEgN",
+            "text": "double-parted bangs",
+            "w": 2
+          },
+          {
+            "id": "DEwL",
+            "text": "low ponytail",
+            "w": 2
+          },
+          {
+            "id": "Zz1Y",
+            "text": "hair over shoulder",
+            "w": 2
+          },
+          {
+            "id": "FQr0",
+            "text": "twin drills",
+            "w": 2
+          },
+          {
+            "id": "pIA7",
+            "text": "short hair with long locks",
+            "w": 2
+          },
+          {
+            "id": "D3Gm",
+            "text": "hair rings",
+            "w": 2
+          },
+          {
+            "id": "Ntm4",
+            "text": "half updo",
+            "w": 2
+          },
+          {
+            "id": "CuSa",
+            "text": "hair flaps",
+            "w": 2
+          },
+          {
+            "id": "6CoR",
+            "text": "short ponytail",
+            "w": 2
+          },
+          {
+            "id": "ok6z",
+            "text": "blunt ends",
+            "w": 2
+          }
+        ]
+      },
+      "jjuzxA0Xzvce": {
+        "schema": 1,
+        "name": "pose",
+        "description": "자세",
+        "items": [
+          {
+            "id": "FLR2",
+            "text": "standing",
+            "w": 10
+          },
+          {
+            "id": "9BJP",
+            "text": "sitting",
+            "w": 10
+          },
+          {
+            "id": "MFNz",
+            "text": "lying",
+            "w": 7
+          },
+          {
+            "id": "2oGQ",
+            "text": "looking back",
+            "w": 5
+          },
+          {
+            "id": "WcXU",
+            "text": "on back",
+            "w": 5
+          },
+          {
+            "id": "3lWZ",
+            "text": "arm up",
+            "w": 5
+          },
+          {
+            "id": "sHgT",
+            "text": "hands up",
+            "w": 5
+          },
+          {
+            "id": "qPyt",
+            "text": "arms up",
+            "w": 4
+          },
+          {
+            "id": "oDgN",
+            "text": "hand on own hip",
+            "w": 4
+          },
+          {
+            "id": "dRaK",
+            "text": "leaning forward",
+            "w": 4
+          },
+          {
+            "id": "bQsn",
+            "text": "kneeling",
+            "w": 3
+          },
+          {
+            "id": "TIw2",
+            "text": "squatting",
+            "w": 3
+          },
+          {
+            "id": "hBvr",
+            "text": "on side",
+            "w": 3
+          },
+          {
+            "id": "fQ8x",
+            "text": "standing on one leg",
+            "w": 3
+          },
+          {
+            "id": "a5KV",
+            "text": "arm support",
+            "w": 3
+          },
+          {
+            "id": "wzZk",
+            "text": "arms behind back",
+            "w": 3
+          },
+          {
+            "id": "S1pt",
+            "text": "crossed arms",
+            "w": 3
+          },
+          {
+            "id": "MWlJ",
+            "text": "leg up",
+            "w": 3
+          },
+          {
+            "id": "87Ic",
+            "text": "wariza",
+            "w": 3
+          },
+          {
+            "id": "3OGt",
+            "text": "crossed legs",
+            "w": 3
+          },
+          {
+            "id": "NkeX",
+            "text": "outstretched arm",
+            "w": 3
+          },
+          {
+            "id": "hv58",
+            "text": "outstretched arms",
+            "w": 3
+          },
+          {
+            "id": "alkH",
+            "text": "on stomach",
+            "w": 3
+          },
+          {
+            "id": "uVG9",
+            "text": "knees up",
+            "w": 2
+          },
+          {
+            "id": "szbt",
+            "text": "arms behind head",
+            "w": 2
+          },
+          {
+            "id": "fQaJ",
+            "text": "arm at side",
+            "w": 2
+          },
+          {
+            "id": "o2oM",
+            "text": "knee up",
+            "w": 2
+          },
+          {
+            "id": "8i7M",
+            "text": "arm behind back",
+            "w": 2
+          },
+          {
+            "id": "AXQN",
+            "text": "hand in pocket",
+            "w": 2
+          },
+          {
+            "id": "ac0I",
+            "text": "seiza",
+            "w": 2
+          },
+          {
+            "id": "IkAL",
+            "text": "arm behind head",
+            "w": 2
+          },
+          {
+            "id": "Knqg",
+            "text": "hands on own hips",
+            "w": 2
+          },
+          {
+            "id": "6qPg",
+            "text": "knees together feet apart",
+            "w": 2
+          },
+          {
+            "id": "Xmo6",
+            "text": "contrapposto",
+            "w": 2
+          },
+          {
+            "id": "DCAE",
+            "text": "on floor",
+            "w": 2
+          },
+          {
+            "id": "32tP",
+            "text": "legs together",
+            "w": 2
+          },
+          {
+            "id": "aEXY",
+            "text": "arms at sides",
+            "w": 2
+          },
+          {
+            "id": "2EnO",
+            "text": "sheathed",
+            "w": 2
+          },
+          {
+            "id": "zs2s",
+            "text": "reaching towards viewer",
+            "w": 2
+          },
+          {
+            "id": "zxbk",
+            "text": "on ground",
+            "w": 2
+          }
+        ]
+      },
+      "jw4Zzoloa4Hm": {
+        "schema": 1,
+        "name": "eyewear",
+        "description": "안경, 고글",
+        "items": [
+          {
+            "id": "thCt",
+            "text": "eyepatch",
+            "w": 10
+          },
+          {
+            "id": "dn15",
+            "text": "eyewear on head",
+            "w": 9
+          },
+          {
+            "id": "L3Rf",
+            "text": "goggles",
+            "w": 9
+          },
+          {
+            "id": "MqrC",
+            "text": "round eyewear",
+            "w": 8
+          },
+          {
+            "id": "IPEM",
+            "text": "semi-rimless eyewear",
+            "w": 8
+          },
+          {
+            "id": "kIyG",
+            "text": "black-framed eyewear",
+            "w": 7
+          },
+          {
+            "id": "IJxk",
+            "text": "goggles on head",
+            "w": 7
+          },
+          {
+            "id": "gogX",
+            "text": "red-framed eyewear",
+            "w": 6
+          },
+          {
+            "id": "3WVO",
+            "text": "tinted eyewear",
+            "w": 6
+          },
+          {
+            "id": "81cE",
+            "text": "under-rim eyewear",
+            "w": 6
+          }
+        ]
+      },
+      "tAOQKxWPGytk": {
+        "schema": 1,
+        "name": "hair color",
+        "description": "머리색",
+        "items": [
+          {
+            "id": "GDlW",
+            "text": "black hair",
+            "w": 10
+          },
+          {
+            "id": "CJsj",
+            "text": "blonde hair",
+            "w": 10
+          },
+          {
+            "id": "vbQ0",
+            "text": "brown hair",
+            "w": 10
+          },
+          {
+            "id": "EUkU",
+            "text": "blue hair",
+            "w": 7
+          },
+          {
+            "id": "ODQJ",
+            "text": "multicolored hair",
+            "w": 7
+          },
+          {
+            "id": "cOB4",
+            "text": "white hair",
+            "w": 7
+          },
+          {
+            "id": "px6y",
+            "text": "pink hair",
+            "w": 7
+          },
+          {
+            "id": "7Lzj",
+            "text": "grey hair",
+            "w": 7
+          },
+          {
+            "id": "PTFc",
+            "text": "purple hair",
+            "w": 6
+          },
+          {
+            "id": "hRL9",
+            "text": "red hair",
+            "w": 6
+          },
+          {
+            "id": "NCZX",
+            "text": "green hair",
+            "w": 5
+          },
+          {
+            "id": "PnbZ",
+            "text": "streaked hair",
+            "w": 4
+          },
+          {
+            "id": "LLmL",
+            "text": "two-tone hair",
+            "w": 4
+          },
+          {
+            "id": "LeSr",
+            "text": "orange hair",
+            "w": 4
+          },
+          {
+            "id": "l5DD",
+            "text": "gradient hair",
+            "w": 3
+          },
+          {
+            "id": "QNgK",
+            "text": "aqua hair",
+            "w": 3
+          },
+          {
+            "id": "I7Od",
+            "text": "colored inner hair",
+            "w": 3
+          },
+          {
+            "id": "TNLy",
+            "text": "split-color hair"
+          },
+          {
+            "id": "RmIC",
+            "text": "colored tips"
+          },
+          {
+            "id": "dRWB",
+            "text": "alternate hair color"
+          }
+        ]
+      },
+      "vVJGdrPyxgTM": {
+        "schema": 1,
+        "name": "dress",
+        "description": "원피스, 드레스",
+        "items": [
+          {
+            "id": "k1fd",
+            "text": "dress",
+            "w": 10
+          },
+          {
+            "id": "FNVv",
+            "text": "white dress",
+            "w": 5
+          },
+          {
+            "id": "anLO",
+            "text": "black dress",
+            "w": 4
+          },
+          {
+            "id": "9ogs",
+            "text": "sleeveless dress",
+            "w": 3
+          },
+          {
+            "id": "F3ha",
+            "text": "blue dress",
+            "w": 3
+          },
+          {
+            "id": "uwyR",
+            "text": "frilled dress",
+            "w": 3
+          },
+          {
+            "id": "oUYn",
+            "text": "red dress",
+            "w": 3
+          },
+          {
+            "id": "7yzZ",
+            "text": "short dress",
+            "w": 3
+          },
+          {
+            "id": "HGf4",
+            "text": "pink dress",
+            "w": 2
+          },
+          {
+            "id": "9O0t",
+            "text": "strapless dress",
+            "w": 2
+          },
+          {
+            "id": "UC2k",
+            "text": "purple dress",
+            "w": 2
+          },
+          {
+            "id": "heTM",
+            "text": "robe",
+            "w": 2
+          },
+          {
+            "id": "WuhN",
+            "text": "green dress",
+            "w": 2
+          },
+          {
+            "id": "rm2r",
+            "text": "sailor dress",
+            "w": 2
+          },
+          {
+            "id": "Xm7S",
+            "text": "long dress",
+            "w": 2
+          },
+          {
+            "id": "AsFq",
+            "text": "brown dress"
+          },
+          {
+            "id": "a2I0",
+            "text": "pinafore dress"
+          },
+          {
+            "id": "MQTB",
+            "text": "two-tone dress"
+          },
+          {
+            "id": "J1rR",
+            "text": "pleated dress"
+          },
+          {
+            "id": "XrHj",
+            "text": "grey dress"
+          }
+        ]
+      },
+      "xGjME5xzHwgH": {
+        "schema": 1,
+        "name": "subject",
+        "description": "오리지널 여자 캐릭터 또는 캐릭터 풀",
+        "items": [
+          {
+            "id": "K1Xz",
+            "ref": {
+              "wildcard": "U69tfux6PKRm"
+            },
+            "w": 3
+          },
+          {
+            "id": "TdPI",
+            "ref": {
+              "wildcard": "eJuxkTkltgN4"
+            },
+            "w": 2
+          }
+        ]
+      },
+      "y8TWL36fGchy": {
+        "schema": 1,
+        "name": "jewelry",
+        "description": "장신구",
+        "items": [
+          {
+            "id": "UuEe",
+            "text": "jewelry",
+            "w": 10
+          },
+          {
+            "id": "vlvV",
+            "text": "earrings",
+            "w": 7
+          },
+          {
+            "id": "0K8X",
+            "text": "choker",
+            "w": 6
+          },
+          {
+            "id": "bEs6",
+            "text": "necklace",
+            "w": 5
+          },
+          {
+            "id": "P870",
+            "text": "ring",
+            "w": 3
+          },
+          {
+            "id": "0hTZ",
+            "text": "ear piercing",
+            "w": 3
+          },
+          {
+            "id": "o04I",
+            "text": "brooch",
+            "w": 2
+          },
+          {
+            "id": "plXd",
+            "text": "single earring",
+            "w": 2
+          },
+          {
+            "id": "JrMu",
+            "text": "neck bell",
+            "w": 2
+          },
+          {
+            "id": "k8xL",
+            "text": "pendant",
+            "w": 2
+          },
+          {
+            "id": "smBA",
+            "text": "hoop earrings",
+            "w": 2
+          },
+          {
+            "id": "ULjr",
+            "text": "stud earrings",
+            "w": 2
+          },
+          {
+            "id": "Xd70",
+            "text": "red choker"
+          },
+          {
+            "id": "3juR",
+            "text": "wedding ring"
+          },
+          {
+            "id": "pOTM",
+            "text": "animal ear piercing"
+          }
+        ]
+      },
+      "ys1kb7pjyQHC": {
+        "schema": 1,
+        "name": "accessories",
+        "description": "액세서리 0~3개. 다섯 풀을 spread로 합친다(spread 예시)",
+        "select": {
+          "count": [
+            0,
+            3
+          ]
+        },
+        "items": [
+          {
+            "id": "PEwQ",
+            "ref": {
+              "wildcard": "7mgRcxWZAKf6"
+            },
+            "spread": true
+          },
+          {
+            "id": "D604",
+            "ref": {
+              "wildcard": "DJ8BtrkrUYM7"
+            },
+            "spread": true
+          },
+          {
+            "id": "K6jV",
+            "ref": {
+              "wildcard": "WO54nzdxlsMF"
+            },
+            "spread": true
+          },
+          {
+            "id": "7v3s",
+            "ref": {
+              "wildcard": "jw4Zzoloa4Hm"
+            },
+            "spread": true
+          },
+          {
+            "id": "c8Um",
+            "ref": {
+              "wildcard": "y8TWL36fGchy"
+            },
+            "spread": true
+          }
+        ]
+      }
+    }
+  },
+  "emoticon test": {
+    "format": 1,
+    "root": "bMXWR29LYKqR",
+    "lock": {
+      "bMXWR29LYKqR": "bMXWR29LYKqR"
+    },
+    "docs": {
+      "bMXWR29LYKqR": {
+        "schema": 1,
+        "name": "emoticon test",
+        "description": "특수문자(| \\ 괄호)와 짧은 이모티콘 태그. 이스케이프 검사용",
+        "select": {
+          "count": [
+            1,
+            3
+          ]
+        },
+        "items": [
+          {
+            "id": "iFRo",
+            "text": "^_^"
+          },
+          {
+            "id": "LbNA",
+            "text": ">_<"
+          },
+          {
+            "id": "vPyB",
+            "text": "@_@"
+          },
+          {
+            "id": "O6Ca",
+            "text": "+_+"
+          },
+          {
+            "id": "V6vF",
+            "text": "=_="
+          },
+          {
+            "id": "i3ua",
+            "text": "o_o"
+          },
+          {
+            "id": "bPI4",
+            "text": "|_|"
+          },
+          {
+            "id": "8V9K",
+            "text": ":|"
+          },
+          {
+            "id": "1dn0",
+            "text": "0_0"
+          },
+          {
+            "id": "9vrD",
+            "text": "\\m/"
+          },
+          {
+            "id": "BK0Y",
+            "text": "\\||/"
+          },
+          {
+            "id": "lWu7",
+            "text": "u_u"
+          },
+          {
+            "id": "GzEo",
+            "text": ">_o"
+          },
+          {
+            "id": "7Le6",
+            "text": "._."
+          },
+          {
+            "id": "qqcP",
+            "text": "x_x"
+          },
+          {
+            "id": "qq10",
+            "text": "<|>_<|>"
+          },
+          {
+            "id": "hgUz",
+            "text": "\\o/"
+          },
+          {
+            "id": "1fOt",
+            "text": "\\n/"
+          },
+          {
+            "id": "sIR3",
+            "text": "double \\m/"
+          },
+          {
+            "id": "6mOD",
+            "text": "double \\||/"
+          },
+          {
+            "id": "uvIP",
+            "text": "artoria pendragon \\(fate\\)"
+          },
+          {
+            "id": "CNdU",
+            "text": "admiral \\(kancolle\\)"
+          },
+          {
+            "id": "92hY",
+            "text": "sensei \\(blue archive\\)"
+          },
+          {
+            "id": "jYgA",
+            "text": "scaramouche \\(genshin impact\\)"
+          },
+          {
+            "id": "jDDn",
+            "text": "kaga \\(kancolle\\)"
+          },
+          {
+            "id": "XPmj",
+            "text": "{\\\\\\|\\|/|<\\|>_<\\|>|:\\|}",
+            "w": 3
+          }
+        ]
+      }
+    }
+  },
+  "outfit": {
+    "format": 1,
+    "root": "hRdLa94rkn1c",
+    "lock": {
+      "AiUlofl5Z8Vg": "AiUlofl5Z8Vg",
+      "HPmOb3be7LWW": "HPmOb3be7LWW",
+      "T5oh3daxPyzP": "T5oh3daxPyzP",
+      "dERJjw30ox2B": "dERJjw30ox2B",
+      "hRdLa94rkn1c": "hRdLa94rkn1c",
+      "vVJGdrPyxgTM": "vVJGdrPyxgTM"
+    },
+    "docs": {
+      "AiUlofl5Z8Vg": {
+        "schema": 1,
+        "name": "top",
+        "description": "상의",
+        "items": [
+          {
+            "id": "6FA6",
+            "text": "shirt",
+            "w": 10
+          },
+          {
+            "id": "QtNT",
+            "text": "jacket",
+            "w": 7
+          },
+          {
+            "id": "z6KL",
+            "text": "white shirt",
+            "w": 7
+          },
+          {
+            "id": "4sIi",
+            "text": "black jacket",
+            "w": 4
+          },
+          {
+            "id": "5MPn",
+            "text": "open jacket",
+            "w": 4
+          },
+          {
+            "id": "M56j",
+            "text": "coat",
+            "w": 4
+          },
+          {
+            "id": "mgEv",
+            "text": "black shirt",
+            "w": 4
+          },
+          {
+            "id": "qtLI",
+            "text": "vest",
+            "w": 3
+          },
+          {
+            "id": "LeFn",
+            "text": "crop top",
+            "w": 3
+          },
+          {
+            "id": "DDfX",
+            "text": "sleeveless shirt",
+            "w": 3
+          },
+          {
+            "id": "MLoG",
+            "text": "hoodie",
+            "w": 3
+          },
+          {
+            "id": "MnJz",
+            "text": "white jacket",
+            "w": 3
+          },
+          {
+            "id": "gDMx",
+            "text": "turtleneck",
+            "w": 3
+          },
+          {
+            "id": "MKJx",
+            "text": "capelet",
+            "w": 2
+          },
+          {
+            "id": "B7mc",
+            "text": "dress shirt",
+            "w": 2
+          },
+          {
+            "id": "FPaU",
+            "text": "blue shirt",
+            "w": 2
+          },
+          {
+            "id": "qRhv",
+            "text": "blue jacket",
+            "w": 2
+          },
+          {
+            "id": "HkqD",
+            "text": "cardigan",
+            "w": 2
+          },
+          {
+            "id": "d5cK",
+            "text": "tank top",
+            "w": 2
+          },
+          {
+            "id": "Z5Xh",
+            "text": "red shirt",
+            "w": 2
+          },
+          {
+            "id": "bite",
+            "text": "grey shirt",
+            "w": 2
+          },
+          {
+            "id": "LGVW",
+            "text": "t-shirt",
+            "w": 2
+          },
+          {
+            "id": "7bPa",
+            "text": "black coat",
+            "w": 2
+          },
+          {
+            "id": "q11P",
+            "text": "red jacket",
+            "w": 2
+          },
+          {
+            "id": "pyQV",
+            "text": "hooded jacket",
+            "w": 2
+          },
+          {
+            "id": "NYO5",
+            "text": "cropped jacket",
+            "w": 2
+          },
+          {
+            "id": "PzjR",
+            "text": "black vest",
+            "w": 2
+          },
+          {
+            "id": "poVX",
+            "text": "white coat",
+            "w": 2
+          },
+          {
+            "id": "OPLo",
+            "text": "pink shirt",
+            "w": 2
+          },
+          {
+            "id": "lIQB",
+            "text": "camisole",
+            "w": 2
+          }
+        ]
+      },
+      "HPmOb3be7LWW": {
+        "schema": 1,
+        "name": "school uniform",
+        "description": "교복",
+        "items": [
+          {
+            "id": "jnAc",
+            "text": "school uniform",
+            "w": 10
+          },
+          {
+            "id": "bbJW",
+            "text": "serafuku",
+            "w": 6
+          },
+          {
+            "id": "XrJl",
+            "text": "blazer",
+            "w": 3
+          },
+          {
+            "id": "CHDo",
+            "text": "winter uniform",
+            "w": 2
+          },
+          {
+            "id": "jlyJ",
+            "text": "gym uniform",
+            "w": 2
+          },
+          {
+            "id": "XD5W",
+            "text": "black serafuku",
+            "w": 2
+          },
+          {
+            "id": "k7QA",
+            "text": "tracen school uniform",
+            "w": 2
+          },
+          {
+            "id": "J91n",
+            "text": "summer uniform",
+            "w": 2
+          },
+          {
+            "id": "Vtq7",
+            "text": "sailor shirt",
+            "w": 2
+          },
+          {
+            "id": "Lyzl",
+            "text": "gakuran",
+            "w": 2
+          },
+          {
+            "id": "0ht9",
+            "text": "hasu no sora school uniform"
+          },
+          {
+            "id": "bqCk",
+            "text": "kita high school uniform"
+          },
+          {
+            "id": "Vyy4",
+            "text": "mitakihara school uniform"
+          },
+          {
+            "id": "D2w2",
+            "text": "sakuragaoka high school uniform"
+          },
+          {
+            "id": "V6jr",
+            "text": "ooarai school uniform"
+          }
+        ]
+      },
+      "T5oh3daxPyzP": {
+        "schema": 1,
+        "name": "bottom",
+        "description": "하의",
+        "items": [
+          {
+            "id": "Y6Mt",
+            "text": "skirt",
+            "w": 10
+          },
+          {
+            "id": "dBBI",
+            "text": "pleated skirt",
+            "w": 6
+          },
+          {
+            "id": "WTvj",
+            "text": "pants",
+            "w": 6
+          },
+          {
+            "id": "BXj2",
+            "text": "shorts",
+            "w": 5
+          },
+          {
+            "id": "vVGS",
+            "text": "black skirt",
+            "w": 5
+          },
+          {
+            "id": "UQYx",
+            "text": "miniskirt",
+            "w": 4
+          },
+          {
+            "id": "4odZ",
+            "text": "blue skirt",
+            "w": 3
+          },
+          {
+            "id": "Zz7M",
+            "text": "black pants",
+            "w": 3
+          },
+          {
+            "id": "yReV",
+            "text": "black shorts",
+            "w": 3
+          },
+          {
+            "id": "ScxC",
+            "text": "red skirt",
+            "w": 3
+          },
+          {
+            "id": "SS4G",
+            "text": "white skirt",
+            "w": 3
+          },
+          {
+            "id": "sUoN",
+            "text": "plaid skirt",
+            "w": 2
+          },
+          {
+            "id": "uFWI",
+            "text": "frilled skirt",
+            "w": 2
+          },
+          {
+            "id": "QKbz",
+            "text": "green skirt",
+            "w": 2
+          },
+          {
+            "id": "26Bh",
+            "text": "grey skirt",
+            "w": 2
+          },
+          {
+            "id": "AzQ6",
+            "text": "white pants",
+            "w": 2
+          },
+          {
+            "id": "acmE",
+            "text": "blue shorts",
+            "w": 2
+          },
+          {
+            "id": "gJsz",
+            "text": "bike shorts",
+            "w": 2
+          },
+          {
+            "id": "NK00",
+            "text": "skirt set",
+            "w": 2
+          },
+          {
+            "id": "z27D",
+            "text": "pink skirt",
+            "w": 2
+          }
+        ]
+      },
+      "dERJjw30ox2B": {
+        "schema": 1,
+        "name": "traditional",
+        "description": "전통 의상",
+        "items": [
+          {
+            "id": "dEMp",
+            "text": "japanese clothes",
+            "w": 10
+          },
+          {
+            "id": "ZLQk",
+            "text": "kimono",
+            "w": 8
+          },
+          {
+            "id": "Vqbe",
+            "text": "chinese clothes",
+            "w": 6
+          },
+          {
+            "id": "00N4",
+            "text": "obi",
+            "w": 5
+          },
+          {
+            "id": "WsqJ",
+            "text": "china dress",
+            "w": 4
+          },
+          {
+            "id": "pbps",
+            "text": "hakama",
+            "w": 4
+          },
+          {
+            "id": "tGr1",
+            "text": "white kimono",
+            "w": 3
+          },
+          {
+            "id": "Fruv",
+            "text": "hakama skirt",
+            "w": 3
+          },
+          {
+            "id": "94hS",
+            "text": "blue kimono",
+            "w": 3
+          },
+          {
+            "id": "WznG",
+            "text": "nontraditional miko",
+            "w": 3
+          },
+          {
+            "id": "8yBA",
+            "text": "yukata",
+            "w": 2
+          },
+          {
+            "id": "5PW5",
+            "text": "print kimono",
+            "w": 2
+          },
+          {
+            "id": "8isK",
+            "text": "black kimono",
+            "w": 2
+          },
+          {
+            "id": "B2Ud",
+            "text": "haori",
+            "w": 2
+          },
+          {
+            "id": "AxnH",
+            "text": "red kimono",
+            "w": 2
+          }
+        ]
+      },
+      "hRdLa94rkn1c": {
+        "schema": 1,
+        "name": "outfit",
+        "description": "의상: 상하의 조합, 드레스, 교복, 전통 의상 중 하나(ref 항목 예시)",
+        "items": [
+          {
+            "id": "WUDe",
+            "text": "${w:AiUlofl5Z8Vg}, ${w:T5oh3daxPyzP}",
+            "w": 4
+          },
+          {
+            "id": "qwyH",
+            "ref": {
+              "wildcard": "vVJGdrPyxgTM"
+            },
+            "w": 3
+          },
+          {
+            "id": "xnGn",
+            "ref": {
+              "wildcard": "HPmOb3be7LWW"
+            },
+            "w": 2
+          },
+          {
+            "id": "Y1Fr",
+            "ref": {
+              "wildcard": "dERJjw30ox2B"
+            }
+          }
+        ]
+      },
+      "vVJGdrPyxgTM": {
+        "schema": 1,
+        "name": "dress",
+        "description": "원피스, 드레스",
+        "items": [
+          {
+            "id": "k1fd",
+            "text": "dress",
+            "w": 10
+          },
+          {
+            "id": "FNVv",
+            "text": "white dress",
+            "w": 5
+          },
+          {
+            "id": "anLO",
+            "text": "black dress",
+            "w": 4
+          },
+          {
+            "id": "9ogs",
+            "text": "sleeveless dress",
+            "w": 3
+          },
+          {
+            "id": "F3ha",
+            "text": "blue dress",
+            "w": 3
+          },
+          {
+            "id": "uwyR",
+            "text": "frilled dress",
+            "w": 3
+          },
+          {
+            "id": "oUYn",
+            "text": "red dress",
+            "w": 3
+          },
+          {
+            "id": "7yzZ",
+            "text": "short dress",
+            "w": 3
+          },
+          {
+            "id": "HGf4",
+            "text": "pink dress",
+            "w": 2
+          },
+          {
+            "id": "9O0t",
+            "text": "strapless dress",
+            "w": 2
+          },
+          {
+            "id": "UC2k",
+            "text": "purple dress",
+            "w": 2
+          },
+          {
+            "id": "heTM",
+            "text": "robe",
+            "w": 2
+          },
+          {
+            "id": "WuhN",
+            "text": "green dress",
+            "w": 2
+          },
+          {
+            "id": "rm2r",
+            "text": "sailor dress",
+            "w": 2
+          },
+          {
+            "id": "Xm7S",
+            "text": "long dress",
+            "w": 2
+          },
+          {
+            "id": "AsFq",
+            "text": "brown dress"
+          },
+          {
+            "id": "a2I0",
+            "text": "pinafore dress"
+          },
+          {
+            "id": "MQTB",
+            "text": "two-tone dress"
+          },
+          {
+            "id": "J1rR",
+            "text": "pleated dress"
+          },
+          {
+            "id": "XrHj",
+            "text": "grey dress"
+          }
+        ]
+      }
+    }
+  },
+  "accessories": {
+    "format": 1,
+    "root": "ys1kb7pjyQHC",
+    "lock": {
+      "7mgRcxWZAKf6": "7mgRcxWZAKf6",
+      "DJ8BtrkrUYM7": "DJ8BtrkrUYM7",
+      "WO54nzdxlsMF": "WO54nzdxlsMF",
+      "jw4Zzoloa4Hm": "jw4Zzoloa4Hm",
+      "y8TWL36fGchy": "y8TWL36fGchy",
+      "ys1kb7pjyQHC": "ys1kb7pjyQHC"
+    },
+    "docs": {
+      "7mgRcxWZAKf6": {
+        "schema": 1,
+        "name": "headwear",
+        "description": "모자, 머리장식",
+        "items": [
+          {
+            "id": "WoSA",
+            "text": "hair ornament",
+            "w": 10
+          },
+          {
+            "id": "6uAa",
+            "text": "hat",
+            "w": 9
+          },
+          {
+            "id": "VD0f",
+            "text": "hair ribbon",
+            "w": 6
+          },
+          {
+            "id": "6ZWN",
+            "text": "hair bow",
+            "w": 6
+          },
+          {
+            "id": "4b1e",
+            "text": "hairband",
+            "w": 6
+          },
+          {
+            "id": "ov9g",
+            "text": "hairclip",
+            "w": 5
+          },
+          {
+            "id": "5WUr",
+            "text": "halo",
+            "w": 5
+          },
+          {
+            "id": "ok2y",
+            "text": "cat ears",
+            "w": 4
+          },
+          {
+            "id": "02DB",
+            "text": "hair flower",
+            "w": 4
+          },
+          {
+            "id": "U7v8",
+            "text": "black hat",
+            "w": 3
+          },
+          {
+            "id": "Ztoh",
+            "text": "fake animal ears",
+            "w": 3
+          },
+          {
+            "id": "lmgz",
+            "text": "maid headdress",
+            "w": 3
+          },
+          {
+            "id": "8boF",
+            "text": "mask",
+            "w": 3
+          },
+          {
+            "id": "2Z0n",
+            "text": "white hat",
+            "w": 3
+          },
+          {
+            "id": "YF2K",
+            "text": "beret",
+            "w": 3
+          },
+          {
+            "id": "0ic9",
+            "text": "black hairband",
+            "w": 3
+          },
+          {
+            "id": "6oRL",
+            "text": "witch hat",
+            "w": 3
+          },
+          {
+            "id": "Tgva",
+            "text": "headband",
+            "w": 3
+          },
+          {
+            "id": "LaX7",
+            "text": "helmet",
+            "w": 2
+          },
+          {
+            "id": "2KbC",
+            "text": "x hair ornament",
+            "w": 2
+          },
+          {
+            "id": "dKJX",
+            "text": "scrunchie",
+            "w": 2
+          },
+          {
+            "id": "1off",
+            "text": "headgear",
+            "w": 2
+          },
+          {
+            "id": "TCvG",
+            "text": "mob cap",
+            "w": 2
+          },
+          {
+            "id": "JBL0",
+            "text": "hair tubes",
+            "w": 2
+          },
+          {
+            "id": "5PYH",
+            "text": "crown",
+            "w": 2
+          },
+          {
+            "id": "j64F",
+            "text": "veil",
+            "w": 2
+          },
+          {
+            "id": "Z2nR",
+            "text": "tiara",
+            "w": 2
+          },
+          {
+            "id": "DWoy",
+            "text": "red hat",
+            "w": 2
+          },
+          {
+            "id": "uBeh",
+            "text": "hat ribbon",
+            "w": 2
+          },
+          {
+            "id": "B1FA",
+            "text": "hat bow",
+            "w": 2
+          }
+        ]
+      },
+      "DJ8BtrkrUYM7": {
+        "schema": 1,
+        "name": "legwear",
+        "description": "양말, 스타킹",
+        "items": [
+          {
+            "id": "gZWk",
+            "text": "thighhighs",
+            "w": 10
+          },
+          {
+            "id": "hCsv",
+            "text": "pantyhose",
+            "w": 7
+          },
+          {
+            "id": "t8Nx",
+            "text": "socks",
+            "w": 6
+          },
+          {
+            "id": "HqoU",
+            "text": "black thighhighs",
+            "w": 6
+          },
+          {
+            "id": "WmEV",
+            "text": "white thighhighs",
+            "w": 5
+          },
+          {
+            "id": "HiOL",
+            "text": "black pantyhose",
+            "w": 4
+          },
+          {
+            "id": "ioHL",
+            "text": "white socks",
+            "w": 4
+          },
+          {
+            "id": "3Euw",
+            "text": "kneehighs",
+            "w": 3
+          },
+          {
+            "id": "0l64",
+            "text": "black socks",
+            "w": 3
+          },
+          {
+            "id": "2PpQ",
+            "text": "white pantyhose",
+            "w": 2
+          },
+          {
+            "id": "eXZ1",
+            "text": "single thighhigh",
+            "w": 2
+          },
+          {
+            "id": "gNdp",
+            "text": "brown pantyhose",
+            "w": 2
+          },
+          {
+            "id": "MtA4",
+            "text": "asymmetrical legwear",
+            "w": 2
+          },
+          {
+            "id": "eBGb",
+            "text": "thighband pantyhose",
+            "w": 2
+          },
+          {
+            "id": "BN4G",
+            "text": "brown thighhighs"
+          }
+        ]
+      },
+      "WO54nzdxlsMF": {
+        "schema": 1,
+        "name": "footwear",
+        "description": "신발",
+        "items": [
+          {
+            "id": "BxZd",
+            "text": "shoes",
+            "w": 10
+          },
+          {
+            "id": "K433",
+            "text": "boots",
+            "w": 9
+          },
+          {
+            "id": "baos",
+            "text": "high heels",
+            "w": 6
+          },
+          {
+            "id": "vzAY",
+            "text": "black shoes",
+            "w": 6
+          },
+          {
+            "id": "g0Bx",
+            "text": "black boots",
+            "w": 5
+          },
+          {
+            "id": "KxTy",
+            "text": "no shoes",
+            "w": 4
+          },
+          {
+            "id": "F5I5",
+            "text": "thigh boots",
+            "w": 4
+          },
+          {
+            "id": "XGPG",
+            "text": "sneakers",
+            "w": 3
+          },
+          {
+            "id": "rq37",
+            "text": "white shoes",
+            "w": 3
+          },
+          {
+            "id": "7ipV",
+            "text": "brown shoes",
+            "w": 3
+          },
+          {
+            "id": "hW1a",
+            "text": "knee boots",
+            "w": 3
+          },
+          {
+            "id": "vJZk",
+            "text": "loafers",
+            "w": 3
+          },
+          {
+            "id": "2Qxi",
+            "text": "brown boots",
+            "w": 3
+          },
+          {
+            "id": "clms",
+            "text": "red shoes",
+            "w": 3
+          },
+          {
+            "id": "LtmY",
+            "text": "white boots",
+            "w": 3
+          }
+        ]
+      },
+      "jw4Zzoloa4Hm": {
+        "schema": 1,
+        "name": "eyewear",
+        "description": "안경, 고글",
+        "items": [
+          {
+            "id": "thCt",
+            "text": "eyepatch",
+            "w": 10
+          },
+          {
+            "id": "dn15",
+            "text": "eyewear on head",
+            "w": 9
+          },
+          {
+            "id": "L3Rf",
+            "text": "goggles",
+            "w": 9
+          },
+          {
+            "id": "MqrC",
+            "text": "round eyewear",
+            "w": 8
+          },
+          {
+            "id": "IPEM",
+            "text": "semi-rimless eyewear",
+            "w": 8
+          },
+          {
+            "id": "kIyG",
+            "text": "black-framed eyewear",
+            "w": 7
+          },
+          {
+            "id": "IJxk",
+            "text": "goggles on head",
+            "w": 7
+          },
+          {
+            "id": "gogX",
+            "text": "red-framed eyewear",
+            "w": 6
+          },
+          {
+            "id": "3WVO",
+            "text": "tinted eyewear",
+            "w": 6
+          },
+          {
+            "id": "81cE",
+            "text": "under-rim eyewear",
+            "w": 6
+          }
+        ]
+      },
+      "y8TWL36fGchy": {
+        "schema": 1,
+        "name": "jewelry",
+        "description": "장신구",
+        "items": [
+          {
+            "id": "UuEe",
+            "text": "jewelry",
+            "w": 10
+          },
+          {
+            "id": "vlvV",
+            "text": "earrings",
+            "w": 7
+          },
+          {
+            "id": "0K8X",
+            "text": "choker",
+            "w": 6
+          },
+          {
+            "id": "bEs6",
+            "text": "necklace",
+            "w": 5
+          },
+          {
+            "id": "P870",
+            "text": "ring",
+            "w": 3
+          },
+          {
+            "id": "0hTZ",
+            "text": "ear piercing",
+            "w": 3
+          },
+          {
+            "id": "o04I",
+            "text": "brooch",
+            "w": 2
+          },
+          {
+            "id": "plXd",
+            "text": "single earring",
+            "w": 2
+          },
+          {
+            "id": "JrMu",
+            "text": "neck bell",
+            "w": 2
+          },
+          {
+            "id": "k8xL",
+            "text": "pendant",
+            "w": 2
+          },
+          {
+            "id": "smBA",
+            "text": "hoop earrings",
+            "w": 2
+          },
+          {
+            "id": "ULjr",
+            "text": "stud earrings",
+            "w": 2
+          },
+          {
+            "id": "Xd70",
+            "text": "red choker"
+          },
+          {
+            "id": "3juR",
+            "text": "wedding ring"
+          },
+          {
+            "id": "pOTM",
+            "text": "animal ear piercing"
+          }
+        ]
+      },
+      "ys1kb7pjyQHC": {
+        "schema": 1,
+        "name": "accessories",
+        "description": "액세서리 0~3개. 다섯 풀을 spread로 합친다(spread 예시)",
+        "select": {
+          "count": [
+            0,
+            3
+          ]
+        },
+        "items": [
+          {
+            "id": "PEwQ",
+            "ref": {
+              "wildcard": "7mgRcxWZAKf6"
+            },
+            "spread": true
+          },
+          {
+            "id": "D604",
+            "ref": {
+              "wildcard": "DJ8BtrkrUYM7"
+            },
+            "spread": true
+          },
+          {
+            "id": "K6jV",
+            "ref": {
+              "wildcard": "WO54nzdxlsMF"
+            },
+            "spread": true
+          },
+          {
+            "id": "7v3s",
+            "ref": {
+              "wildcard": "jw4Zzoloa4Hm"
+            },
+            "spread": true
+          },
+          {
+            "id": "c8Um",
+            "ref": {
+              "wildcard": "y8TWL36fGchy"
+            },
+            "spread": true
+          }
+        ]
+      }
+    }
+  }
+}
