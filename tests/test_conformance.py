@@ -40,14 +40,18 @@ class Syntax(unittest.TestCase):
         for c in cases:
             with self.subTest(c["name"]):
                 try:
-                    got = {"ast": X.to_common(X.parse(c["text"], c.get("mode", "stored")))}
+                    if X.is_comment(c["text"]):
+                        got = {"comment": True}  # SPEC 2.4: 주석은 구문 트리가 아니라 "주석"
+                        self.assertEqual(X.parse(c["text"], c.get("mode", "stored")), [])
+                    else:
+                        got = {"ast": X.to_common(X.parse(c["text"], c.get("mode", "stored")))}
                 except X.ExpandError as e:
                     got = {"error": e.code}
                 if "ok" in c["expect"]:
                     self.assertIn("ast", got)
                 else:
                     self.assertEqual(got, c["expect"])
-        self.assertGreaterEqual(len(cases), 83)
+        self.assertGreaterEqual(len(cases), 107)
 
     def test_numbering_is_preorder(self):
         nodes = X.parse("${w:AAAAAAAAAAAA}{a|{b|${w:BBBBBBBBBBBB}}|c}x${w:CCCCCCCCCCCC}")
@@ -189,6 +193,28 @@ def marked_texts(b):
     return b
 
 
+def _is_comment_item(it):
+    return isinstance(it, dict) and isinstance(it.get("text"), str) and X.is_comment(it["text"])
+
+
+def without_comments(b):
+    """주석 항목을 모두 뺀다(성질 6)"""
+    b = copy.deepcopy(b)
+    for d in b["docs"].values():
+        if isinstance(d, dict) and isinstance(d.get("items"), list):
+            d["items"] = [it for it in d["items"] if not _is_comment_item(it)]
+    return b
+
+
+def with_comment(b):
+    """문서마다 문법 오류·없는 참조·이름 참조가 든 주석 항목을 하나 더한다(성질 6)"""
+    b = copy.deepcopy(b)
+    for d in b["docs"].values():
+        if isinstance(d, dict) and isinstance(d.get("items"), list):
+            d["items"].insert(len(d["items"]) // 2, {"id": "zzComment01", "text": "# {broken ${w:Wnowhere0000} ${이름}", "w": 7})
+    return b
+
+
 @unittest.skipUnless(HAVE, "공통 테스트 세트가 없음")
 class Expand(unittest.TestCase):
     def test_cases(self):
@@ -199,7 +225,7 @@ class Expand(unittest.TestCase):
                     exp = {k: r[k] for k in ("text", "error") if k in r}
                     self.assertEqual(run(case["bundle"], case.get("limits"), int(r["seed"])), exp)
                 runs += 1
-        self.assertGreaterEqual(runs, 235)
+        self.assertGreaterEqual(runs, 272)
 
     def test_properties(self):
         n = 0
@@ -214,6 +240,9 @@ class Expand(unittest.TestCase):
                 for i, vb in enumerate(variants):
                     self.assertEqual(run(vb, lim, seed), {"text": r["text"]}, f"{fn} seed={seed} variant {i}")
                 self.assertEqual(traced(marked, lim, seed), traced(case["bundle"], lim, seed), f"{fn} seed={seed} marked")
+                for name, vb in (("without-comments", without_comments(case["bundle"])), ("with-comment", with_comment(case["bundle"]))):
+                    self.assertEqual(run(vb, lim, seed), {"text": r["text"]}, f"{fn} seed={seed} {name}")
+                    self.assertEqual(traced(vb, lim, seed), traced(case["bundle"], lim, seed), f"{fn} seed={seed} {name} trace")
                 n += 1
         self.assertGreater(n, 150)
 

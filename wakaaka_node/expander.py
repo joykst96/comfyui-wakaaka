@@ -63,14 +63,26 @@ def _ref(body, mode):
     return None, body.strip(BLANK)
 
 
+def is_comment(text):
+    """주석 항목의 텍스트인지(SPEC 2.7): 첫 글자가 #. 앞 공백이나 전각 ＃은 아니다."""
+    return text.startswith("#")
+
+
 def parse(text, mode="stored"):
-    """텍스트 → 노드 목록(str, Ref, Choice). 참조·선택지에는 만나는 순서(= 전위 순서)로 번호를 매긴다(SPEC 2.4)."""
+    """텍스트 → 노드 목록(str, Ref, Choice). 참조·선택지에는 만나는 순서(= 전위 순서)로 번호를 매긴다(SPEC 2.4).
+
+    주석(is_comment)은 인라인 문법을 읽지 않으므로 빈 목록이다. 후보에서 빼는 것은 read_doc이 한다."""
+    if is_comment(text):
+        return []
     root = []
     cur = root
     stack = []  # (Choice, 바깥 목록)
     buf = []
     count = 0
     i, n = 0, len(text)
+    if text.startswith("\\#"):  # SPEC 2.2: 텍스트 맨 앞의 \#은 글자 #
+        buf.append("#")
+        i = 2
     alt_start = False
 
     def flush():
@@ -313,6 +325,8 @@ def read_doc(raw):
         if has_text:
             if type(it["text"]) is not str:
                 raise ExpandError("E_DOC")
+            if is_comment(it["text"]):
+                continue  # SPEC 2.7: 주석 항목은 스키마만 보고 문서에 없는 것처럼 뺀다(문법·참조·후보 모두)
             d.items.append(Item(iid, w, False, None, parse(it["text"])))
         else:
             ref = it["ref"]
