@@ -7,7 +7,7 @@ TS 전개기와 이 노드의 Python 전개기가 같은 세트를 통과해야 
 | 항목 | 값 |
 |---|---|
 | 저장소 | `joykst96/wakaaka` |
-| 커밋 | `61410a8` (브랜치 `claude/comment-lines-4748cf`, 주석 항목 SPEC 2.7) |
+| 커밋 | `61410a8` (main, 주석 항목 SPEC 2.7) |
 | 복사한 날 | 2026-11-08 |
 
 `tests/data/bundles.json`은 `ed1a747`에서 `node fixtures/tools/build-examples.ts`가 만든 `fixtures/out/bundles.json`이다(차등 테스트용 예시 묶음). `61410a8`에서 다시 만든 것과 바이트 단위로 같아 그대로 둔다.
