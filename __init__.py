@@ -3,6 +3,7 @@
 import asyncio
 import logging
 import os
+import threading
 
 import folder_paths
 from aiohttp import web
@@ -13,6 +14,8 @@ from .wakaaka_node.client import ApiError, Client, NetworkError
 from .wakaaka_node.cache import Cache
 from .wakaaka_node.fill import Prefetcher, fill
 from .wakaaka_node.ids import extract_id
+from .wakaaka_node.tagindex import QueryError
+from .wakaaka_node.tagupdate import TagIndex
 from .wakaaka_node.node import NODE_CLASS_MAPPINGS, NODE_DISPLAY_NAME_MAPPINGS, RUN_TOKEN, WakaakaWildcard
 
 log = logging.getLogger("wakaaka")
@@ -24,12 +27,15 @@ def _settings(user="default"):
     return settings.load(settings.settings_path(folder_paths.get_user_directory(), user))
 
 
-def _cache_root():
+def _data_root():
     try:
-        base = folder_paths.get_system_user_directory("wakaaka")  # user/__wakaaka: HTTP로 읽을 수 없는 시스템 폴더
+        return folder_paths.get_system_user_directory("wakaaka")  # user/__wakaaka: HTTP로 읽을 수 없는 시스템 폴더
     except AttributeError:  # 옛 ComfyUI
-        base = os.path.join(folder_paths.get_user_directory(), "__wakaaka")
-    return os.path.join(base, "cache")
+        return os.path.join(folder_paths.get_user_directory(), "__wakaaka")
+
+
+def _cache_root():
+    return os.path.join(_data_root(), "cache")
 
 
 def _client():
@@ -41,6 +47,9 @@ def _client():
 
 CACHE = Cache(_cache_root())
 PREFETCH = Prefetcher(CACHE, _client)
+# 태그 인덱스(DESIGN 8절): 로딩 때 백그라운드로 한 번 최신 확인. 실패해도 기존 인덱스를 쓰고 시작을 막지 않는다.
+TAGS = TagIndex(os.path.join(_data_root(), "tags"))
+threading.Thread(target=TAGS.refresh, name="wakaaka-tags", daemon=True).start()
 
 
 def _fill_node(wildcard, seed, follow_latest, lock):
@@ -83,6 +92,24 @@ async def _meta(request):
     except ApiError as e:
         return web.json_response({"ok": False, "id": wid, "error": "찾을 수 없음" if e.status == 404 else f"서버 오류 {e.status}"})
     return web.json_response({"ok": True, "id": wid, "name": m["name"], "owner": m["owner"], "version": m["version"]})
+
+
+@PromptServer.instance.routes.get("/wakaaka/tags/suggest")
+async def _tags_suggest(request):
+    """태그 자동완성. 서버 /api/tags/suggest와 같은 규칙·응답(`{tags:[…]}`, 최대 20개). 검색은 스레드에서 한다."""
+    if "q" not in request.query:
+        return web.json_response({"error": {"code": "E_QUERY", "message": "query does not match the schema"}}, status=400)
+    try:
+        r = await asyncio.get_running_loop().run_in_executor(None, TAGS.suggest, request.query["q"])
+    except QueryError as e:
+        return web.json_response({"error": {"code": "E_QUERY", "message": str(e)}}, status=400)
+    return web.json_response(r)
+
+
+@PromptServer.instance.routes.get("/wakaaka/tags/status")
+async def _tags_status(request):
+    """태그 인덱스 상태: state(none·downloading·ready·error), job, 파일 이름, sha256, 행 수, 만든 시각, 마지막 오류."""
+    return web.json_response(TAGS.status())
 
 
 log.info("[wakaaka] comfy node %s loaded from %s, cache %s", VERSION, os.path.dirname(__file__), CACHE.root)

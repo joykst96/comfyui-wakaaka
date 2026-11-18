@@ -64,17 +64,24 @@ New-Item -ItemType Junction -Path <ComfyUI>\custom_nodes\comfyui-wakaaka -Target
 - 서버 모드도 성공한 뒤 그 버전의 묶음을 백그라운드로 받아 캐시한다.
 - 요청은 User-Agent `wakaaka-comfy-node/<버전>`, 타임아웃 3초. 연결에 실패하면 10초 동안 그 서버를 부르지 않고 바로 캐시로 간다(큐에 넣는 동안 ComfyUI가 멈춰 있기 때문).
 
+## 태그 인덱스 (자동완성용)
+
+- ComfyUI가 노드를 로딩할 때 백그라운드에서 Hugging Face [`mengod-hf/danbooru-tags-kr`](https://huggingface.co/datasets/mengod-hf/danbooru-tags-kr)의 최신 통합본(`danbooru-tags-kr-YYYY-MM-DD.csv`)을 확인한다. 파일 목록의 SHA-256이 지금 인덱스와 다를 때만 받아(약 27MB) SQLite 인덱스(약 110MB)로 바꾼다. 형식 검증을 통과해야 바꿔 넣고, 실패하거나 오프라인이면 기존 인덱스를 그대로 쓴다. ComfyUI 시작을 막지 않는다.
+- 위치는 `ComfyUI/user/__wakaaka/tags`. 받은 CSV는 변환 뒤 지우고 데이터셋 LICENSE(`LICENSE-danbooru-tags-kr`)를 옆에 둔다. 한국어 번역·설명·분류는 CC BY-SA 4.0이다.
+- 경로: `GET /wakaaka/tags/suggest?q=`(와카아카 서버 `/api/tags/suggest`와 같은 규칙과 응답, 최대 20개), `GET /wakaaka/tags/status`.
+
 ## 구조
 
 | 파일 | 내용 |
 |---|---|
-| `__init__.py` | ComfyUI에 붙이는 곳: on-prompt 훅, `/wakaaka/meta` 경로, 노드 등록, 캐시 위치 |
+| `__init__.py` | ComfyUI에 붙이는 곳: on-prompt 훅, `/wakaaka/meta`·`/wakaaka/tags/*` 경로, 노드 등록, 캐시·태그 인덱스 위치 |
 | `wakaaka_node/node.py` | 노드 정의와 실행 |
 | `wakaaka_node/hook.py` | 큐에 넣을 때 prompt·PNG 워크플로·화면에 text와 lock을 쓴다 |
 | `wakaaka_node/fill.py` | 모드별로 노드 하나를 채운다(서버, 로컬, 캐시) |
 | `wakaaka_node/client.py` | 서버 API 호출 |
 | `wakaaka_node/expander.py` | 전개기(와카아카 `docs/SPEC.md`). TS 전개기와 글자 단위로 같은 결과 |
 | `wakaaka_node/jcs.py`, `bundle.py`, `cache.py` | 내용 해시, 묶음 검증, 캐시 |
+| `wakaaka_node/tagcsv.py`, `tagindex.py`, `tagupdate.py` | 태그 CSV 읽기, SQLite 인덱스와 검색, 받기·검증·교체 |
 | `web/wakaaka.js` | 설정, 정보 줄, 읽기 전용 text, "웹에서 열기" |
 | `tests/` | 단위 테스트, 공통 테스트 세트 사본(`conformance/`), 예시 묶음(`data/`) |
 
@@ -90,6 +97,8 @@ python -I -m unittest discover -s tests -t .
 - `test_differential.py`: 참조 모델(`refmodel.py`)과 무작위 묶음, 예시 묶음(`tests/data/bundles.json`) 차등 비교
 - `test_basics.py`, `test_server_mode.py`, `test_local_mode.py`: ID·설정, 가짜 서버로 HTTP·훅·노드·캐시·오프라인
 - `test_live.py`: 실제 서버와 curl 응답 비교. `WAKAAKA_LIVE_URL`(예: `http://127.0.0.1:3000`)을 줄 때만 돈다
+- `test_tags.py`: 태그 CSV 파서(두 키워드 표기), 검색 규칙, 가짜 Hugging Face로 받기·건너뛰기·교체·실패 시 유지
+- `test_tags_live.py`: 태그 검색을 실제 서버 `/api/tags/suggest`와 비교. `WAKAAKA_LIVE_URL`과 서버가 가져온 CSV(`WAKAAKA_TAGS_CSV`)를 줄 때만 돈다
 
 ## 라이선스
 
