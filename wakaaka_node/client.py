@@ -1,4 +1,4 @@
-"""와카아카 서버 API 호출 (`/api/w/{id}/meta`, `/resolve`, `/bundle`).
+"""와카아카 서버 API 호출 (`/api/w/{id}/meta`, `/resolve`, `/bundle`, `/api/users/{아이디}/wildcards`).
 
 - User-Agent는 `wakaaka-comfy-node/<버전>`. 기본값 `Python-urllib/…`은 Cloudflare가 1010으로 막는다.
 - 훅은 ComfyUI 이벤트 루프 안에서 동기로 돌므로 타임아웃을 짧게 두고, 연결에 실패하면 잠시 그 서버를 부르지 않는다.
@@ -131,6 +131,18 @@ class Client:
         if not ok:
             raise ApiError(200, "E_RESPONSE", "bad resolve response")
         return r
+
+    def user_wildcards(self, username):
+        """유저의 와일드카드 목록 [{id, name, fixed}]. 없는 아이디는 ApiError 404."""
+        r = self._json(f"/api/users/{quote(username, safe='')}/wildcards")
+        ws = r.get("wildcards") if isinstance(r, dict) else None
+        if not isinstance(ws, list):
+            raise ApiError(200, "E_RESPONSE", "bad user wildcards response")
+        out = []
+        for w in ws:
+            if isinstance(w, dict) and isinstance(w.get("id"), str) and ID12.fullmatch(w["id"]) and isinstance(w.get("name"), str):
+                out.append({"id": w["id"], "name": w["name"], "fixed": w.get("fixed") is True})
+        return out
 
     def bundle_bytes(self, wid):
         """묶음 원문 바이트. 검증은 받는 쪽(bundle.py)이 한다."""

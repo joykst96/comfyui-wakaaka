@@ -16,7 +16,10 @@ from .wakaaka_node.fill import Prefetcher, fill
 from .wakaaka_node.ids import extract_id
 from .wakaaka_node.tagindex import QueryError
 from .wakaaka_node.tagupdate import TagIndex
-from .wakaaka_node.node import NODE_CLASS_MAPPINGS, NODE_DISPLAY_NAME_MAPPINGS, RUN_TOKEN, WakaakaWildcard
+from .wakaaka_node.node import NODE_CLASS_MAPPINGS, NODE_DISPLAY_NAME_MAPPINGS, RUN_TOKEN, WakaakaText, WakaakaWildcard
+from .wakaaka_node.text import fill_text
+from .wakaaka_node.userlist import UserLists
+from .wakaaka_node import userlist
 
 log = logging.getLogger("wakaaka")
 WEB_DIRECTORY = "./web"
@@ -61,12 +64,21 @@ def _send(event, data, sid):
     srv.send_sync(event, data, sid if sid is not None else srv.client_id)
 
 
+USERS = UserLists()
+
+
+def _fill_text(text, seed, refs):
+    return fill_text(text, seed, refs, _settings(), cache=CACHE, userlists=USERS)
+
+
 def _on_prompt(json_data):
-    return hook.on_prompt(json_data, _fill_node, _send, RUN_TOKEN)
+    return hook.on_prompt(json_data, _fill_node, _send, RUN_TOKEN, _fill_text)
 
 
 WakaakaWildcard.fill_node = staticmethod(_fill_node)
 WakaakaWildcard.send = staticmethod(_send)
+WakaakaText.fill_text = staticmethod(_fill_text)
+WakaakaText.send = staticmethod(_send)
 PromptServer.instance.add_on_prompt_handler(_on_prompt)
 
 
@@ -104,6 +116,22 @@ async def _tags_suggest(request):
     except QueryError as e:
         return web.json_response({"error": {"code": "E_QUERY", "message": str(e)}}, status=400)
     return web.json_response(r)
+
+
+@PromptServer.instance.routes.get("/wakaaka/wildcards/suggest")
+async def _wildcards_suggest(request):
+    """`${` 자동완성: 설정된 유저의 와일드카드 중 이름에 q가 든 것(최대 30개). 유저 아이디가 비었거나 없으면 state로 알린다."""
+    try:
+        user = PromptServer.instance.user_manager.get_request_user_id(request)
+    except KeyError:
+        user = "default"
+    s = _settings(user)
+    items, state = await asyncio.get_running_loop().run_in_executor(None, USERS.get, s)
+    return web.json_response({
+        "user": s.user or "",
+        "state": state,
+        "wildcards": userlist.suggest(items, request.query.get("q", "")),
+    })
 
 
 @PromptServer.instance.routes.get("/wakaaka/tags/status")

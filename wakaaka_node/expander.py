@@ -68,10 +68,11 @@ def is_comment(text):
     return text.startswith("#")
 
 
-def parse(text, mode="stored"):
+def parse(text, mode="stored", spans=None):
     """텍스트 → 노드 목록(str, Ref, Choice). 참조·선택지에는 만나는 순서(= 전위 순서)로 번호를 매긴다(SPEC 2.4).
 
-    주석(is_comment)은 인라인 문법을 읽지 않으므로 빈 목록이다. 후보에서 빼는 것은 read_doc이 한다."""
+    주석(is_comment)은 인라인 문법을 읽지 않으므로 빈 목록이다. 후보에서 빼는 것은 read_doc이 한다.
+    spans에 목록을 주면 참조마다 원문 범위 (시작, 끝, Ref)를 만나는 순서로 붙인다(Wakaaka Text가 `${이름}`을 `${w:ID}`로 바꿀 때 쓴다)."""
     if is_comment(text):
         return []
     root = []
@@ -122,6 +123,8 @@ def parse(text, mode="stored"):
             wid, name = _ref(text[i + 2 : j], mode)
             flush()
             cur.append(Ref(wid, name, count))
+            if spans is not None:
+                spans.append((i, j + 1, cur[-1]))
             count += 1
             i = j + 1
         elif c == "{":

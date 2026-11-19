@@ -1,10 +1,11 @@
-"""노드 `Wakaaka Wildcard` (DESIGN 8절). ComfyUI에 묶이는 함수(채우기, send_sync)는 __init__.py가 넣어 준다."""
+"""노드 `Wakaaka Wildcard`와 `Wakaaka Text` (DESIGN 8절). ComfyUI에 묶이는 함수(채우기, send_sync)는 __init__.py가 넣어 준다."""
 
 import secrets
 
 from .fill import FillError
-from .hook import NODE_TYPE, publish
+from .hook import NODE_TYPE, TEXT_TYPE, publish, publish_text
 from .ids import parse_lock_value
+from .text import parse_refs_value
 
 SEED_MAX = (1 << 64) - 1
 # 이 프로세스에서 훅이 채운 값인지 알아보는 표시. prompt의 lock에만 들어가고 워크플로·화면에는 남지 않는다.
@@ -59,5 +60,53 @@ class WakaakaWildcard:
         return (r.text,)
 
 
-NODE_CLASS_MAPPINGS = {NODE_TYPE: WakaakaWildcard}
-NODE_DISPLAY_NAME_MAPPINGS = {NODE_TYPE: "Wakaaka Wildcard"}
+class WakaakaText:
+    fill_text = None  # (text, seed, refs) -> text.TextResult
+    send = None  # (event, data, sid)
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "text": ("STRING", {"default": "", "multiline": True, "dynamicPrompts": False,
+                                    "tooltip": "프롬프트. 와카아카 문법(${이름}, {a|b}, {2*a|b}, 이스케이프)을 쓴다. 첫 글자가 #인 줄은 주석."}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": SEED_MAX, "control_after_generate": True}),
+            },
+            "optional": {
+                "result": ("STRING", {"default": "", "multiline": True, "tooltip": "큐에 넣을 때 채워지는 결과(읽기 전용)."}),
+                "refs": ("STRING", {"default": "", "multiline": False, "tooltip": "참조한 이름 → ID와 그때의 lock."}),
+            },
+            "hidden": {"unique_id": "UNIQUE_ID", "extra_pnginfo": "EXTRA_PNGINFO"},
+        }
+
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("text",)
+    FUNCTION = "run"
+    CATEGORY = "wakaaka"
+    DESCRIPTION = "와카아카 문법을 쓰는 여러 줄 프롬프트. 태그와 와일드카드 자동완성이 붙고, 큐에 넣을 때 전개 결과와 참조 ID가 채워져 이미지에 남는다."
+
+    @classmethod
+    def IS_CHANGED(cls, refs="", **_):
+        rv = parse_refs_value(refs)
+        if rv.get("run") == RUN_TOKEN:
+            return ""  # 훅이 채운 값이면 입력(result, refs)이 그대로 캐시 키다
+        return float("nan")
+
+    def run(self, text, seed, result="", refs="", unique_id=None, extra_pnginfo=None):
+        rv = parse_refs_value(refs)
+        if "error" in rv:
+            raise RuntimeError(f"[와카아카] {rv['error']}")
+        if rv.get("run") == RUN_TOKEN:
+            return (result,)
+        # 훅이 채우지 못한 경우(입력이 링크였음): 지금 채우고 PNG 워크플로와 화면에도 반영한다
+        try:
+            r = type(self).fill_text(text, seed, refs)
+        except FillError as e:
+            raise RuntimeError(f"[와카아카] {e}") from None
+        workflow = extra_pnginfo.get("workflow") if isinstance(extra_pnginfo, dict) else None
+        publish_text(unique_id, r, None, workflow, type(self).send, None, RUN_TOKEN)
+        return (r.text,)
+
+
+NODE_CLASS_MAPPINGS = {NODE_TYPE: WakaakaWildcard, TEXT_TYPE: WakaakaText}
+NODE_DISPLAY_NAME_MAPPINGS = {NODE_TYPE: "Wakaaka Wildcard", TEXT_TYPE: "Wakaaka Text"}
