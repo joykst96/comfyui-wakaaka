@@ -91,6 +91,13 @@ New-Item -ItemType Junction -Path <ComfyUI>\custom_nodes\comfyui-wakaaka -Target
 - 위치는 `ComfyUI/user/__wakaaka/tags/tags-<SHA-256 앞 16자>.sqlite`(약 110MB, 부분 일치용 FTS5 trigram 포함). 받은 CSV는 변환 뒤 지우고 데이터셋 LICENSE(`LICENSE-danbooru-tags-kr`)를 옆에 둔다.
 - 태그 데이터 출처: Hugging Face [`mengod-hf/danbooru-tags-kr`](https://huggingface.co/datasets/mengod-hf/danbooru-tags-kr). 한국어 번역·설명·분류·키워드는 CC BY-SA 4.0이다(데이터셋 LICENSE). 태그 이름과 포스트 수는 Danbooru에서 온 것이다.
 - 경로: `GET /wakaaka/tags/suggest?q=`(와카아카 서버 `/api/tags/suggest`와 같은 규칙과 응답, 최대 20개), `GET /wakaaka/tags/status`.
+- 이 Python의 SQLite가 FTS5 trigram을 만들 수 없으면 받지 않고 상태에 이유를 남긴다. LICENSE를 받지 못하면 인덱스는 만들고 상태의 `licenseError`에 남긴 뒤 다음 확인 때 다시 받아 본다.
+
+## 한계
+
+- **`--multi-user`**: 자동완성(`${` 후보)은 요청한 사용자의 `Wakaaka.UserId`를 보지만, 큐에 넣을 때의 훅은 누가 넣었는지 몰라 `default` 사용자의 설정을 본다. 팝업으로 고른 이름은 `refs`에 ID가 있어 상관없지만, 손으로 친 이름은 `default` 사용자의 유저 아이디로 찾는다.
+- **큐에 넣을 때 화면이 멈출 수 있다**: 훅은 ComfyUI 이벤트 루프 안에서 동기로 돈다. Wakaaka Text 하나를 큐에 넣을 때 부르는 것은 참조한 와일드카드마다 묶음 1번(최신으로 전개하므로 캐시가 있어도 부른다)과, `refs`에 ID가 없는 이름이 있을 때만 유저 목록 1번(60초 메모리 캐시)이다(`tests/test_text.py` RequestCount). 요청마다 타임아웃은 3초다. 서버가 느리게라도 답하면 참조 수만큼 기다리고, 연결이 안 되면 첫 실패 뒤 10초 동안 그 서버를 부르지 않으므로 한 번(최대 3초)만 기다린 뒤 캐시로 전개한다.
+- Wakaaka Wildcard의 로컬 모드도 큐마다 `/meta`와 `/bundle`을 부른다(서버 모드는 `/meta`와 `/resolve`).
 
 ## 구조
 

@@ -6,6 +6,8 @@ ComfyUI가 노드를 로딩할 때 백그라운드 스레드에서 refresh()를 
 3. 임시 파일에 인덱스를 만들고 형식 검증 관문(check_stats)을 통과할 때만 `tags-<sha256 앞 16자>.sqlite`로 바꿔 넣는다.
 4. 받은 CSV는 지운다. 데이터셋의 LICENSE를 옆에 둔다.
 무엇이 실패하든 기존 인덱스를 그대로 쓰고 ComfyUI 시작을 막지 않는다. 형식 검증에 떨어진 파일은 sha256을 적어 두고 다시 받지 않는다.
+받은 뒤에 실패해 켤 때마다 다시 받는 일이 없게, 이 Python의 SQLite가 FTS5 trigram을 만들 수 있는지는 받기 전에 본다.
+LICENSE를 받지 못하면(파일 목록에 없음, 받기 실패) 인덱스는 만들고 상태(licenseError)에 남긴다. 다음 확인 때 다시 받아 본다.
 
 폴더 안의 `tags-*.sqlite`는 다 만든 뒤에만 그 이름을 얻으므로 늘 완전하다. 여러 개면 가장 늦게 만든 것을 쓰고 나머지는 지운다.
 """
@@ -19,6 +21,7 @@ import os
 import re
 import secrets
 import socket
+import sqlite3
 import threading
 import time
 import urllib.error
@@ -138,6 +141,7 @@ class TagIndex:
         self._meta = None
         self._job = "idle"  # idle, checking, downloading, building
         self._error = None
+        self._license_error = None
         self._checked_at = None
         self._load()
 
@@ -171,17 +175,28 @@ class TagIndex:
                 self._path, self._meta = None, None
 
     def suggest(self, q):
-        """서버 /api/tags/suggest와 같은 결과. 인덱스가 없으면 빈 목록. 잘못된 질의는 tagindex.QueryError."""
+        """서버 /api/tags/suggest와 같은 결과. 인덱스가 없으면 빈 목록. 잘못된 질의는 tagindex.QueryError.
+
+        경로는 잠금 안에서 읽고 연결은 밖에서 연다. 그 사이 refresh가 옛 파일을 지웠으면(교체) 지금 인덱스로 한 번 더 해 보고,
+        그래도 열 수 없으면 빈 목록과 "error"로 답한다(500을 내지 않는다).
+        """
         q = tagindex.normalize_query(q)  # 인덱스가 없어도 잘못된 질의는 400으로
-        with self._lock:
-            path = self._path
-        if path is None:
-            return {"tags": []}
-        con = tagindex._open(path)
-        try:
-            return tagindex.suggest(con, q)
-        finally:
-            con.close()
+        err = None
+        for _ in range(2):
+            with self._lock:
+                path = self._path
+            if path is None:
+                return {"tags": []}
+            try:
+                con = tagindex._open(path)
+                try:
+                    return tagindex.suggest(con, q)
+                finally:
+                    con.close()
+            except sqlite3.Error as e:
+                err = e
+        log.warning("[wakaaka] tag search failed: %s", err)
+        return {"tags": [], "error": f"태그 인덱스를 읽을 수 없음: {err}"}
 
     def status(self):
         with self._lock:
@@ -191,6 +206,7 @@ class TagIndex:
                 "job": job,
                 "error": error,
                 "checkedAt": self._checked_at,
+                "licenseError": self._license_error,
             }
         if meta:
             out.update({k: meta.get(k) for k in ("file", "sha256", "size", "rows", "builtAt")})
@@ -228,6 +244,9 @@ class TagIndex:
 
     def _refresh(self):
         self._set_job("checking")
+        why = tagindex.fts5_trigram_support()
+        if why is not None:
+            raise UpdateError(f"이 Python의 SQLite에 FTS5 trigram이 없어 태그 인덱스를 만들 수 없음: {why}")
         os.makedirs(self.root, exist_ok=True)
         tree = self._get_json(f"/api/datasets/{self.repo}/tree/main")
         latest, lic = pick_latest(tree)
@@ -248,7 +267,7 @@ class TagIndex:
             t0 = time.perf_counter()
             self._download(latest, csv_tmp)
             t1 = time.perf_counter()
-            license_bytes = self._fetch_license(lic)
+            license_bytes = self._try_license(lic)
             self._set_job("building")
             try:
                 stats = tagindex.build(csv_tmp, db_tmp, latest)
@@ -264,7 +283,8 @@ class TagIndex:
             except PermissionError:  # 다른 ComfyUI가 같은 파일을 만들어 열고 있다
                 if (tagindex.read_meta(final) or {}).get("sha256") != latest["sha256"]:
                     raise
-            self._write_license(license_bytes)
+            if license_bytes is not None:
+                self._write_license(license_bytes)
             new_meta = tagindex.read_meta(final)
             if new_meta is None:
                 raise UpdateError("new index cannot be read")
@@ -344,9 +364,27 @@ class TagIndex:
     def _write_license(self, data):
         _atomic_write(os.path.join(self.root, LICENSE_FILE), data)
 
+    def _try_license(self, lic):
+        """LICENSE 바이트, 받지 못하면 None(이유는 licenseError에). 인덱스 교체를 막지 않는다."""
+        try:
+            data = self._fetch_license(lic)
+        except UpdateError as e:
+            with self._lock:
+                self._license_error = str(e)
+            log.warning("[wakaaka] tag index: dataset LICENSE not saved: %s", e)
+            return None
+        with self._lock:
+            self._license_error = None
+        return data
+
     def _ensure_license(self, lic):
-        if not os.path.isfile(os.path.join(self.root, LICENSE_FILE)):
-            self._write_license(self._fetch_license(lic))
+        if os.path.isfile(os.path.join(self.root, LICENSE_FILE)):
+            with self._lock:
+                self._license_error = None
+            return
+        data = self._try_license(lic)
+        if data is not None:
+            self._write_license(data)
 
     def _read_rejected(self):
         try:

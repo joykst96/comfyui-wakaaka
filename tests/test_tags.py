@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import random
+import sqlite3
 import tempfile
 import unittest
 from unittest import mock
@@ -191,9 +192,12 @@ class Hub:
         self.url = self.srv.url
         self.lfs_oid_override = {}
 
-    def put(self, name, data):
+    def put(self, name, data, license=True):
         self.files[name] = data
-        self.files["LICENSE"] = LICENSE
+        if license:
+            self.files["LICENSE"] = LICENSE
+        else:
+            self.files.pop("LICENSE", None)
         tree = [{"type": "directory", "oid": "x", "size": 0, "path": "old"}]
         for n, d in sorted(self.files.items()):
             e = {"type": "file", "oid": hashlib.sha1(b"blob %d\0" % len(d) + d).hexdigest(), "size": len(d), "path": n}
@@ -374,3 +378,107 @@ class Gate(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@mock.patch.object(tagupdate, "MIN_ROWS", 100)
+class SuggestDuringSwap(unittest.TestCase):
+    """검토 3번: 검색이 경로를 읽은 뒤 연결을 열기 전에 refresh가 옛 파일을 지운 경우."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = os.path.join(self.tmp.name, "tags")
+        self.hub = Hub()
+        self.hub.put("danbooru-tags-kr-2026-11-10.csv", make_csv(200))
+        self.ti = TagIndex(self.root, base_url=self.hub.url)
+        with mock.patch.object(tagupdate, "MIN_ROWS", 100):  # 클래스 데코레이터는 setUp에 걸리지 않는다
+            self.assertTrue(self.ti.refresh().startswith("built"))
+
+    def tearDown(self):
+        self.hub.close()
+        self.tmp.cleanup()
+
+    def swap_during_open(self, new_path):
+        """처음 연결을 열 때 옛 파일이 지워지고 인덱스가 new_path로 바뀐 것처럼"""
+        real = tagindex._open
+        calls = []
+
+        def fake(path):
+            calls.append(path)
+            if len(calls) == 1:
+                with self.ti._lock:
+                    self.ti._path = new_path
+                raise sqlite3.OperationalError("unable to open database file")
+            return real(path)
+
+        return mock.patch.object(tagindex, "_open", fake), calls
+
+    def test_retries_with_current_index(self):
+        old = self.ti._path
+        self.hub.put("danbooru-tags-kr-2026-11-20.csv", make_csv(220, seed=2))
+        other = TagIndex(os.path.join(self.tmp.name, "other"), base_url=self.hub.url)
+        other.refresh()
+        patch, calls = self.swap_during_open(other._path)
+        with patch:
+            r = self.ti.suggest("tag 00210")
+        self.assertEqual(calls, [old, other._path])
+        self.assertEqual(r["tags"][0]["name"][:9], "tag_00210")  # 새 인덱스에만 있는 태그
+
+    def test_gives_empty_result_with_error(self):
+        patch, calls = self.swap_during_open(os.path.join(self.root, "tags-" + "0" * 16 + ".sqlite"))
+        with patch:
+            r = self.ti.suggest("tag")
+        self.assertEqual(r["tags"], [])
+        self.assertIn("error", r)
+        self.assertEqual(len(calls), 2)
+
+
+@mock.patch.object(tagupdate, "MIN_ROWS", 100)
+class NonFormatFailures(unittest.TestCase):
+    """검토 6번: 형식 문제가 아닌 이유로 실패해 켤 때마다 27MB를 다시 받지 않게."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = os.path.join(self.tmp.name, "tags")
+        self.hub = Hub()
+
+    def tearDown(self):
+        self.hub.close()
+        self.tmp.cleanup()
+
+    def test_no_fts5_trigram_checks_before_download(self):
+        self.hub.put("danbooru-tags-kr-2026-11-10.csv", make_csv(200))
+        ti = TagIndex(self.root, base_url=self.hub.url)
+        with mock.patch.object(tagindex, "fts5_trigram_support", lambda: "no such tokenizer: trigram"):
+            msg = ti.refresh()
+            self.assertIn("FTS5 trigram", msg)
+            self.assertEqual(self.hub.srv.requests, [])  # 파일 목록도 받지 않는다
+            st = ti.status()
+            self.assertEqual(st["state"], "error")
+            self.assertIn("FTS5 trigram", st["error"])
+
+    def test_missing_license_still_builds_and_is_reported(self):
+        self.hub.put("danbooru-tags-kr-2026-11-10.csv", make_csv(200), license=False)
+        ti = TagIndex(self.root, base_url=self.hub.url)
+        self.assertTrue(ti.refresh().startswith("built"))
+        st = ti.status()
+        self.assertEqual((st["state"], st["rows"]), ("ready", 200))
+        self.assertIn("LICENSE", st["licenseError"])
+        self.assertNotIn("LICENSE-danbooru-tags-kr", os.listdir(self.root))
+        # 다시 켜도 CSV를 다시 받지 않는다
+        ti2 = TagIndex(self.root, base_url=self.hub.url)
+        self.assertTrue(ti2.refresh().startswith("up to date"))
+        self.assertEqual(len(self.hub.downloads()), 1)
+        self.assertIn("LICENSE", ti2.status()["licenseError"])
+        # LICENSE가 생기면 받아 둔다
+        self.hub.put("danbooru-tags-kr-2026-11-10.csv", make_csv(200))
+        self.assertTrue(ti2.refresh().startswith("up to date"))
+        self.assertIsNone(ti2.status()["licenseError"])
+        self.assertIn("LICENSE-danbooru-tags-kr", os.listdir(self.root))
+        self.assertEqual(len(self.hub.downloads()), 1)
+
+    def test_license_download_failure_does_not_discard_index(self):
+        self.hub.put("danbooru-tags-kr-2026-11-10.csv", make_csv(200))
+        self.hub.srv.routes[f"/datasets/{REPO}/resolve/main/LICENSE"] = (500, {}, 0)
+        ti = TagIndex(self.root, base_url=self.hub.url)
+        self.assertTrue(ti.refresh().startswith("built"))
+        self.assertIn("HTTP 500", ti.status()["licenseError"])

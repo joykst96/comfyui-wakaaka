@@ -67,6 +67,21 @@ INSERT INTO ko_fts(ko_fts) VALUES('optimize');
 CAP = 1000  # 부분 일치 후보가 이보다 많으면 FTS 대신 post_count 순 훑기
 
 
+def fts5_trigram_support():
+    """이 Python의 SQLite가 FTS5 trigram(detail=full)을 만들 수 있으면 None, 아니면 이유. 인덱스를 받기 전에 본다."""
+    try:
+        con = sqlite3.connect(":memory:")
+        try:
+            con.execute("CREATE VIRTUAL TABLE t USING fts5(a, tokenize='trigram case_sensitive 1', detail=full, columnsize=0)")
+            con.execute("INSERT INTO t VALUES ('abcd')")
+            con.execute("SELECT rowid FROM t WHERE t MATCH '\"bcd\"'").fetchall()
+        finally:
+            con.close()
+    except sqlite3.Error as e:
+        return f"{e} (SQLite {sqlite3.sqlite_version})"
+    return None
+
+
 class QueryError(ValueError):
     """서버가 400 E_QUERY로 답하는 질의."""
 
