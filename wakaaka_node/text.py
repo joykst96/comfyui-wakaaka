@@ -7,8 +7,11 @@
 5. maxDepth 17로 전개한다(임시 루트가 깊이를 1 더한다). maxExpansions는 텍스트 전체가 함께 쓴다.
 
 모드와 상관없이 노드에서 전개한다(서버에는 임의 텍스트를 전개하는 엔드포인트가 없다). 항상 최신으로 전개하고 lock은 기록만 한다.
-서버에 연결할 수 없으면 기존 로컬 모드처럼 마지막으로 받은 최신 lock의 캐시로 전개한다.
+서버에 연결할 수 없으면 기존 로컬 모드처럼 마지막으로 받은 최신 lock의 캐시로 전개한다. 최신 lock은 Text 자기 기록(`latest-text/`)을
+먼저 보고, 없으면 Wakaaka Wildcard의 기록(`latest/`)을 본다. Text는 버전 번호를 모르므로 Wildcard의 기록에는 쓰지 않는다.
 """
+
+TEXT_LATEST = "latest-text"
 
 import json
 
@@ -149,8 +152,13 @@ def _latest(wid, client, cache):
     try:
         b = fetch_bundle(client, wid)
     except NetworkError as e:
-        src = cache.get_latest(wid) if cache is not None else None
-        b = cache.bundle(wid, src["lock"]) if src is not None else None
+        b = None
+        if cache is not None:
+            for kind in (TEXT_LATEST, "latest"):
+                src = cache.get_latest(wid, kind)
+                b = cache.bundle(wid, src["lock"]) if src is not None else None
+                if b is not None:
+                    break
         if b is None:
             raise not_found(wid, f"서버에 연결할 수 없고 캐시도 없음: {e}") from None
         return b, "cache"
@@ -161,8 +169,7 @@ def _latest(wid, client, cache):
     if cache is not None:
         try:
             cache.put_bundle(b)
-            prev = cache.get_latest(wid)
-            cache.put_latest(wid, b["lock"], prev["v"] if prev and prev["lock"].get(wid) == b["root"] else None)
+            cache.put_latest(wid, b["lock"], None, TEXT_LATEST)
         except OSError:
             pass
     return b, "local"

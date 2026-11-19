@@ -1,7 +1,9 @@
 """해시 단위 캐시 (DESIGN 8절). ComfyUI `user/__wakaaka/cache` 아래에 둬서 노드를 업데이트해도 남는다.
 
 - `docs/<해시>.json`: 해시를 확인한 문서의 정규화 JSON. 읽을 때도 해시를 다시 확인한다.
-- `latest/<와일드카드 ID>.json`: 마지막으로 받은 최신 lock과 버전 번호. 오프라인에서 follow_latest가 켜져 있을 때 쓴다.
+- `latest/<와일드카드 ID>.json`: 마지막으로 받은 최신 lock과 버전 번호. 오프라인에서 follow_latest가 켜져 있을 때 쓴다(Wakaaka Wildcard).
+- `latest-text/<와일드카드 ID>.json`: Wakaaka Text가 마지막으로 받은 최신 lock. 버전 번호를 모르므로 Wildcard의 기록과 나눠 둔다
+  (Text가 먼저 새 버전을 받아도 Wildcard의 오프라인 전개와 버전 표시는 그대로다).
 파일 이름은 base62 12자 정규식을 통과한 값만 쓴다(경로 조작 방지, DESIGN 9절 8항).
 """
 
@@ -88,11 +90,11 @@ class Cache:
 
     # ------------------------------------------------------------ 최신 lock
 
-    def put_latest(self, wid, lock, version):
-        self._write(self._path("latest", wid), json.dumps({"lock": dict(sorted(lock.items())), "v": version}, separators=(",", ":")))
+    def put_latest(self, wid, lock, version, kind="latest"):
+        self._write(self._path(kind, wid), json.dumps({"lock": dict(sorted(lock.items())), "v": version}, separators=(",", ":")))
 
-    def get_latest(self, wid):
-        v = self._read(self._path("latest", wid))
+    def get_latest(self, wid, kind="latest"):
+        v = self._read(self._path(kind, wid))
         if not isinstance(v, dict) or not valid_lock(v.get("lock")) or v["lock"].get(wid) is None:
             return None
         ver = v.get("v")

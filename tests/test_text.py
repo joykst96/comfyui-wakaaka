@@ -338,3 +338,70 @@ class SettingsKeys(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SharedCache(Base):
+    """검토 2번: Text가 먼저 새 버전을 받은 뒤 서버가 끊겨도 Wildcard의 오프라인 lock·버전 표시는 그대로다."""
+
+    def test_text_does_not_overwrite_wildcard_latest(self):
+        from wakaaka_node import fill as F
+
+        old = self.world.bundle(HAIR)
+        meta = {"id": HAIR, "name": "hair", "owner": "me", "version": 4, "hash": old["root"]}
+        self.srv.routes[f"/api/w/{HAIR}/meta"] = (200, meta, 0)
+        s = Settings("local", self.srv.url, "mine")
+        r = F.fill(HAIR, 1, True, "", s, cache=self.cache)  # Wildcard가 v4를 받아 둠
+        self.assertEqual((r.version, r.lock[HAIR]), (4, old["root"]))
+        # 서버에 새 버전: Text가 먼저 받는다
+        self.world.docs[HAIR] = doc("black hair")
+        new = self.world.bundle(HAIR)
+        self.srv.routes[f"/api/w/{HAIR}/bundle"] = (200, jcs.canonicalize(new).encode(), 0)
+        self.assertEqual(self.fill("${hair}").lock[HAIR], new["root"])
+        # 서버가 끊김
+        self.srv.close()
+        client.forget_failures()
+        off = F.fill(HAIR, 1, True, "", s, cache=self.cache)
+        self.assertEqual((off.source, off.version, off.lock[HAIR]), ("cache", 4, old["root"]))  # Wildcard는 전과 같다
+        # Text는 자기가 마지막으로 받은 것으로 전개한다
+        t = T.fill_text("${w:%s}" % HAIR, 0, "", self.settings, cache=self.cache, userlists=self.users)
+        self.assertEqual((t.source, t.lock[HAIR], t.text), ("cache", new["root"], "black hair"))
+
+    def test_text_falls_back_to_wildcard_record(self):
+        # Text가 받은 적 없는 ID는 Wildcard가 받아 둔 최신 기록으로 오프라인 전개한다
+        from wakaaka_node import fill as F
+
+        b = self.world.bundle(EYES)
+        self.srv.routes[f"/api/w/{EYES}/meta"] = (200, {"id": EYES, "name": "e", "owner": "me", "version": 2, "hash": b["root"]}, 0)
+        F.fill(EYES, 0, True, "", Settings("local", self.srv.url), cache=self.cache)
+        self.srv.close()
+        client.forget_failures()
+        t = T.fill_text("${w:%s}" % EYES, 0, "", self.settings, cache=self.cache, userlists=self.users)
+        self.assertEqual((t.source, t.lock), ("cache", b["lock"]))
+
+
+class RequestCount(Base):
+    """README "한계": 훅은 이벤트 루프 안에서 동기로 부른다. 큐 한 번에 몇 번 부르는지."""
+
+    def test_counts(self):
+        t = "${hair}, ${Eyes}, ${옷 > 상의}"
+        self.fill(t, 0)  # 이름이 refs에 없음: 유저 목록 1번 + 참조마다 묶음 1번
+        self.assertEqual((len(self.requests("/api/users/")), len(self.requests("/bundle"))), (1, 3))
+        r = self.fill(t, 1)  # 60초 안: 유저 목록은 메모리 캐시, 묶음은 다시 받는다(최신으로 전개하므로)
+        self.assertEqual((len(self.requests("/api/users/")), len(self.requests("/bundle"))), (1, 6))
+        refs = T.dump_refs_value(r.refs, r.lock)
+        self.users.forget()
+        self.fill(t, 2, refs)  # 이름이 모두 refs에 있음(자동완성으로 골랐거나 PNG에서 불러옴): 유저 목록을 부르지 않는다
+        self.assertEqual((len(self.requests("/api/users/")), len(self.requests("/bundle"))), (1, 9))
+
+    def test_server_down_costs_one_failure(self):
+        import time
+
+        t = "${hair}, ${Eyes}, ${옷 > 상의}"
+        r = self.fill(t, 0)
+        refs = T.dump_refs_value(r.refs, r.lock)
+        self.srv.close()
+        client.forget_failures()
+        t0 = time.monotonic()
+        off = self.fill(t, 0, refs)  # 첫 실패 뒤 10초 동안 그 서버를 부르지 않으므로 나머지는 바로 캐시로
+        self.assertEqual((off.text, off.source), (r.text, "cache"))
+        self.assertLess(time.monotonic() - t0, 2.5)
