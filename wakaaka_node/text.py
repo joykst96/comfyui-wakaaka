@@ -5,6 +5,7 @@
 3. 항목 하나짜리 임시 루트 문서 `{"schema":1,"items":[{"id":"t","text":…}]}`로 감싼다. 항목 id `t`는 난수 경로에 들어가므로 바꾸지 않는다.
 4. 참조된 ID마다 최신 묶음을 받아 합친다(lock·docs 합집합, root는 임시 루트). 같은 ID의 해시가 엇갈리면 한 번 다시 받고, 그래도면 오류.
 5. maxDepth 17로 전개한다(임시 루트가 깊이를 1 더한다). maxExpansions는 텍스트 전체가 함께 쓴다.
+6. 전개 결과(SPEC 4.4 정리까지 끝난 것)의 띄어쓰기를 다듬는다(`tidy`, DESIGN 8절 "결과 다듬기"). Wakaaka Wildcard에는 없는 노드 규칙이다.
 
 모드와 상관없이 노드에서 전개한다(서버에는 임의 텍스트를 전개하는 엔드포인트가 없다). 항상 최신으로 전개하고 lock은 기록만 한다.
 서버에 연결할 수 없으면 기존 로컬 모드처럼 마지막으로 받은 최신 lock의 캐시로 전개한다. 최신 lock은 Text 자기 기록(`latest-text/`)을
@@ -14,6 +15,7 @@
 TEXT_LATEST = "latest-text"
 
 import json
+import re
 
 from . import bundle as B
 from .client import ApiError, Client, NetworkError
@@ -64,6 +66,30 @@ def strip_comment_lines(text):
             line = line[1:]
         kept.append(line)
     return "\n".join(kept)
+
+
+_RUN = re.compile(r"[ \t]+")
+_SPACE_BEFORE_COMMA = re.compile(r" ,")
+_COMMA_WITHOUT_SPACE = re.compile(r",(?![ ,]|$)")
+
+
+def tidy(s):
+    """결과 다듬기(DESIGN 8절, 2026-11-19 사용자 결정). 줄(`\\n`)마다 따로 한다.
+
+    1. 줄의 앞뒤 공백을 지운다. 앞은 스페이스·탭, 뒤는 스페이스·탭·`\\r`(`\\r`은 줄 끝 공백으로 본다).
+    2. 스페이스·탭이 이어진 것은 스페이스 한 칸.
+    3. 쉼표 앞의 공백을 지운다.
+    4. 쉼표 뒤에 스페이스 한 칸. 줄 끝이면 넣지 않는다. 바로 뒤가 쉼표여도 넣지 않는다(3번과 부딪히므로.
+       전개 결과에서는 SPEC 4.4 정리가 빈 조각을 지워 쉼표가 붙어 나오지 않는다).
+    대상은 ASCII 쉼표·스페이스·탭과 줄 끝 `\\r`뿐이다. 전각 쉼표, U+3000, U+00A0, 줄 가운데의 `\\r`은 그대로 둔다.
+    쉼표와 그 밖의 글자는 지우거나 더하지 않는다. 두 번 다듬어도 같다.
+    """
+    lines = []
+    for line in s.split("\n"):
+        line = _RUN.sub(" ", line.lstrip(" \t").rstrip(" \t\r"))
+        line = _SPACE_BEFORE_COMMA.sub(",", line)
+        lines.append(_COMMA_WITHOUT_SPACE.sub(", ", line))
+    return "\n".join(lines)
 
 
 def parse_refs_value(s):
@@ -212,4 +238,4 @@ def fill_text(text, seed, refs_value, settings, client=None, cache=None, userlis
     except ExpandError as e:
         raise FillError(f"전개하지 못함: {e.code}" + (f" ({e.wildcard})" if e.wildcard else "")) from None
     source = "cache" if any(s == "cache" for _, s in got) else "local"
-    return TextResult(out, refs, lock, source)
+    return TextResult(tidy(out), refs, lock, source)

@@ -3,6 +3,7 @@
 import json
 import tempfile
 import unittest
+import unittest.mock
 
 from wakaaka_node import client, hook, jcs, text as T
 from wakaaka_node.cache import Cache
@@ -432,6 +433,121 @@ class Simple(Base):
         finally:
             WakaakaText.fill_text = None
             WakaakaText.send = None
+
+
+FW_COMMA, IDEO_SPACE, NBSP = chr(0xFF0C), chr(0x3000), chr(0xA0)
+
+
+class Tidy(unittest.TestCase):
+    """결과 다듬기(DESIGN 8절 "결과 다듬기")"""
+
+    def test_cases(self):
+        cases = [
+            ("a,b", "a, b"),
+            ("a,   b", "a, b"),
+            ("a  b,  c", "a b, c"),
+            ("a , b", "a, b"),
+            ("a,\nb", "a,\nb"),  # 줄 끝 쉼표 뒤에는 넣지 않는다
+            ("a, \n  b", "a,\nb"),
+            ("a,\n\nb", "a,\n\nb"),  # 빈 줄 유지
+            ("\n\na\n\n", "\n\na\n\n"),  # 줄바꿈은 그대로
+            ("a\t,\tb", "a, b"),
+            ("\t a \t b\t", "a b"),
+            ("a,\t\tb  \t c", "a, b c"),
+            ("a" + FW_COMMA + "b" + IDEO_SPACE + IDEO_SPACE + "c" + NBSP + NBSP + ",d",
+             "a" + FW_COMMA + "b" + IDEO_SPACE + IDEO_SPACE + "c" + NBSP + NBSP + ", d"),  # 대상 밖 글자는 그대로
+            (IDEO_SPACE + "a" + NBSP, IDEO_SPACE + "a" + NBSP),
+            ("(a:1.2), b", "(a:1.2), b"),
+            ("(a:1.2),b, [c], <lora:x:0.8>", "(a:1.2), b, [c], <lora:x:0.8>"),
+            ("\\(x\\), y", "\\(x\\), y"),
+            ("", ""),
+            ("   ", ""),
+            (",", ","),
+            ("a,\r\nb ,\r", "a,\nb,"),  # 줄 끝 \r은 공백
+            ("a\rb", "a\rb"),  # 줄 가운데 \r은 그대로
+            ("1,000", "1, 000"),  # 숫자 안의 쉼표도 띄운다(DESIGN)
+            ("a,,b", "a,, b"),  # 쉼표 바로 뒤가 쉼표면 넣지 않는다(SPEC 4.4 뒤라 전개 결과에는 없다)
+        ]
+        for src, want in cases:
+            self.assertEqual(T.tidy(src), want, repr(src))
+
+    def test_properties(self):
+        import random
+        import re
+        rnd = random.Random(20261119)
+        alphabet = [" ", " ", "\t", ",", ",", "\n", "\r", "a", "b", "(", ":", "1", ".", "\\", "가", FW_COMMA, IDEO_SPACE, NBSP]
+        ws = " \t\r,"
+        for _ in range(20000):
+            x = "".join(rnd.choice(alphabet) for _ in range(rnd.randrange(0, 24)))
+            for src in (x, cleanup(x)):
+                y = T.tidy(src)
+                m = repr(src)
+                self.assertEqual(T.tidy(y), y, m)  # 멱등
+                self.assertEqual(y.count("\n"), src.count("\n"), m)  # 줄 수
+                self.assertEqual([c for c in y if c not in ws], [c for c in src if c not in ws], m)  # 그 밖의 글자
+                self.assertEqual(y.count(","), src.count(","), m)  # 쉼표는 지우거나 더하지 않는다
+                self.assertNotIn("  ", y, m)
+                self.assertNotIn("\t", y, m)
+                self.assertNotIn(" ,", y, m)
+                for line in y.split("\n"):
+                    self.assertEqual(line, line.strip(" \t"), m)
+                    self.assertFalse(line.endswith("\r"), m)
+                self.assertIsNone(re.search(r",(?![ ,\n]|$)", y), m)  # 쉼표 뒤는 스페이스(줄 끝·붙은 쉼표 제외)
+            # 전개기 정리(SPEC 4.4) 뒤에는 붙은 쉼표가 없으므로 예외 없이 쉼표 뒤가 스페이스나 줄 끝이다
+            y = T.tidy(cleanup(x))
+            self.assertNotIn(",,", y, repr(x))
+            self.assertIsNone(re.search(r",(?![ \n]|$)", y), repr(x))
+
+
+MESSY = "MessyMessyXX"
+
+
+class TidyThroughHook(Base):
+    def setUp(self):
+        super().setUp()
+        self.srv.close()
+        self.world.docs[MESSY] = doc("red  hair ,blue eyes,smile\t\t,  1girl")
+        items = USER_ITEMS + [{"id": MESSY, "name": "messy", "owner": "me", "version": 1, "hash": "x", "fixed": False}]
+        self.srv = FakeServer(self.world.routes({"mine": items}))
+        self.settings = Settings("server", self.srv.url, "mine")
+
+    def both(self, text, seed):
+        p = {"prompt": {
+            "5": {"class_type": "WakaakaText", "inputs": {"text": text, "seed": seed, "result": "", "refs": ""}},
+            "8": {"class_type": "WakaakaTextSimple", "inputs": {"text": text, "seed": seed, "result": "", "refs": ""}},
+        }}
+        hook.on_prompt(p, None, None, "tok", lambda t, s, r: self.fill(t, s, r))
+        a, b = p["prompt"]["5"]["inputs"]["result"], p["prompt"]["8"]["inputs"]["result"]
+        self.assertEqual(a, b)  # Text와 Simple은 여전히 같다
+        return a
+
+    def test_result_is_tidied(self):
+        # 참조 있는 텍스트: 와일드카드 안의 띄어쓰기도 다듬는다
+        self.assertEqual(self.both("${messy}", 0), "red hair, blue eyes, smile, 1girl")
+        self.assertEqual(self.both("masterpiece ,${messy},{best  quality}\n  ${messy} , x  ", 3),
+                         "masterpiece, red hair, blue eyes, smile, 1girl, best quality\nred hair, blue eyes, smile, 1girl, x")
+        # 참조 없는 텍스트
+        self.assertEqual(self.both("1girl,smile , {a|a}  b,\n\n\tlast ,", 9), "1girl, smile, a b,\n\nlast")  # 맨 끝 쉼표는 SPEC 4.4가 지운다
+
+    def test_result_equals_tidy_of_raw(self):
+        texts = ["${hair} ,${Eyes},{smile|frown}  x", "${girl preset},${옷 > 상의} ,  {1*a|2*b|3*c}", "a,b\n c ,d"]
+        for t in texts:
+            for seed in range(20):
+                with unittest.mock.patch.object(T, "tidy", lambda s: s):
+                    raw = self.fill(t, seed).text
+                got = self.both(t, seed)
+                self.assertEqual(got, T.tidy(raw), (t, seed))
+
+    def test_wildcard_node_untouched(self):
+        # Wakaaka Wildcard는 다듬지 않는다: 전개기 결과 그대로
+        from wakaaka_node import ids
+        from wakaaka_node.fill import fill
+        s = Settings("local", self.srv.url, "mine")
+        lock = self.world.bundle(MESSY)["lock"]
+        with unittest.mock.patch.object(T, "tidy", side_effect=AssertionError("Wildcard 경로가 tidy를 부름")):
+            r = fill(MESSY, 0, False, ids.dump_lock_value(lock, 1), s, cache=self.cache)
+        self.assertEqual(r.text, "red  hair ,blue eyes,smile\t\t,  1girl")
+        self.assertEqual(r.text, expand(self.world.bundle(MESSY), 0))
 
 
 class SettingsKeys(unittest.TestCase):
