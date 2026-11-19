@@ -1,9 +1,10 @@
 # comfyui-wakaaka — Wakaaka Wildcard, Wakaaka Text
 
-[와카아카](https://wakaaka.baepoyong.com) 와일드카드를 전개해 프롬프트 문자열(STRING)을 내는 ComfyUI 커스텀 노드 둘.
+[와카아카](https://wakaaka.baepoyong.com) 와일드카드를 전개해 프롬프트 문자열(STRING)을 내는 ComfyUI 커스텀 노드.
 
 - **Wakaaka Wildcard**: 와일드카드 ID 하나를 seed로 전개한다. 웹 미리보기와 같은 결과.
 - **Wakaaka Text**: 여러 줄 프롬프트 칸. 태그와 와일드카드 자동완성이 붙고, 와카아카 문법(`${이름}`, `{a|b}`, `{2*a|b}`)을 전개한다.
+- **Wakaaka Text (Simple)**: Wakaaka Text와 같지만 텍스트 칸과 seed만 보인다.
 
 와카아카는 프롬프트 와일드카드를 웹에서 편집·공유하는 서비스다. 웹, 서버, 이 노드가 같은 와일드카드와 seed에서 글자 단위로 같은 결과를 낸다. 서비스와 명세(`docs/SPEC.md`), 설계(`docs/DESIGN.md` 8절)는 와카아카 저장소 [joykst96/wakaaka](https://github.com/joykst96/wakaaka)에 있다.
 
@@ -57,6 +58,10 @@ New-Item -ItemType Junction -Path <ComfyUI>\custom_nodes\comfyui-wakaaka -Target
 - **전개**: 항상 노드에서, 참조한 와일드카드의 최신 버전으로 한다(모드 설정과 상관없음). 서버에 연결할 수 없으면 캐시로 전개한다. `${X}` 하나뿐인 텍스트도 같은 seed의 Wakaaka Wildcard(ID X)와 결과가 다르다(텍스트가 한 단계 위의 문서로 전개되기 때문, 설계 8절). 웹 미리보기와 같은 결과가 필요하면 Wakaaka Wildcard를 쓴다.
 - 문법 오류, 찾을 수 없는 이름(모두 적는다), 받을 수 없는 와일드카드는 노드 오류로 낸다. 옛 결과가 조용히 나가지 않는다.
 
+### Wakaaka Text (Simple)
+
+노드 **Wakaaka Text (Simple)**(종류 `WakaakaTextSimple`)은 기본 여러 줄 문자열 노드에 seed와 "생성 후 제어"만 붙은 모양이다. 하는 일은 Wakaaka Text와 같다. 문법, 자동완성(태그, `${` 와일드카드), 이름 해석, 전개 규칙이 같아서 같은 `text`·seed면 결과가 같고 두 노드를 바꿔 끼워도 프롬프트가 달라지지 않는다. 결과 칸과 노드 아래 정보 줄이 없을 뿐, `result`(최종 프롬프트)와 `refs`(이름 → ID, lock)는 숨긴 값으로 있어서 큐에 넣을 때 채워지고 PNG에 남는다. 전개 결과를 화면에서 보려면 출력을 문자열 표시 노드(예: Preview Any)에 잇거나 Wakaaka Text를 쓴다. 찾을 수 없는 이름 같은 문제는 큐에 넣을 때 노드 오류로만 보인다.
+
 큐에 넣을 때 노드가 text와 lock을 채워 실행 입력과 PNG 워크플로에 써 넣는다. 그래서 모든 이미지에 그때의 결과와 lock이 남는다. 옛 이미지를 다시 만들려면 PNG를 불러와 `follow_latest`를 끄고 큐에 넣는다.
 
 `wildcard`나 `seed`를 다른 노드에서 링크로 받으면 큐에 넣을 때 값을 알 수 없어 실행할 때 채운다. 이때도 PNG 워크플로에는 남지만, 화면의 text는 실행이 끝난 뒤에 바뀐다.
@@ -96,7 +101,7 @@ New-Item -ItemType Junction -Path <ComfyUI>\custom_nodes\comfyui-wakaaka -Target
 ## 한계
 
 - **`--multi-user`**: 자동완성(`${` 후보)은 요청한 사용자의 `Wakaaka.UserId`를 보지만, 큐에 넣을 때의 훅은 누가 넣었는지 몰라 `default` 사용자의 설정을 본다. 팝업으로 고른 이름은 `refs`에 ID가 있어 상관없지만, 손으로 친 이름은 `default` 사용자의 유저 아이디로 찾는다.
-- **큐에 넣을 때 화면이 멈출 수 있다**: 훅은 ComfyUI 이벤트 루프 안에서 동기로 돈다. Wakaaka Text 하나를 큐에 넣을 때 부르는 것은 참조한 와일드카드마다 묶음 1번(최신으로 전개하므로 캐시가 있어도 부른다)과, `refs`에 ID가 없는 이름이 있을 때만 유저 목록 1번(60초 메모리 캐시)이다(`tests/test_text.py` RequestCount). 요청마다 타임아웃은 3초다. 서버가 느리게라도 답하면 참조 수만큼 기다리고, 연결이 안 되면 첫 실패 뒤 10초 동안 그 서버를 부르지 않으므로 한 번(최대 3초)만 기다린 뒤 캐시로 전개한다.
+- **큐에 넣을 때 화면이 멈출 수 있다**: 훅은 ComfyUI 이벤트 루프 안에서 동기로 돈다. Wakaaka Text(Simple도 같다) 하나를 큐에 넣을 때 부르는 것은 참조한 와일드카드마다 묶음 1번(최신으로 전개하므로 캐시가 있어도 부른다)과, `refs`에 ID가 없는 이름이 있을 때만 유저 목록 1번(60초 메모리 캐시)이다(`tests/test_text.py` RequestCount). 요청마다 타임아웃은 3초다. 서버가 느리게라도 답하면 참조 수만큼 기다리고, 연결이 안 되면 첫 실패 뒤 10초 동안 그 서버를 부르지 않으므로 한 번(최대 3초)만 기다린 뒤 캐시로 전개한다.
 - Wakaaka Wildcard의 로컬 모드도 큐마다 `/meta`와 `/bundle`을 부른다(서버 모드는 `/meta`와 `/resolve`).
 
 ## 구조
@@ -112,7 +117,7 @@ New-Item -ItemType Junction -Path <ComfyUI>\custom_nodes\comfyui-wakaaka -Target
 | `wakaaka_node/jcs.py`, `bundle.py`, `cache.py` | 내용 해시, 묶음 검증, 캐시 |
 | `wakaaka_node/tagcsv.py`, `tagindex.py`, `tagupdate.py` | 태그 CSV 읽기, SQLite 인덱스와 검색, 받기·검증·교체 |
 | `wakaaka_node/text.py`, `userlist.py` | Wakaaka Text 전개(줄 주석, 이름 → ID, 묶음 합치기), 유저 와일드카드 목록 |
-| `web/wakaaka_text.js`, `web/lib/textcore.js` | Wakaaka Text 화면(자동완성 팝업, 정보 줄), 자동완성 순수 함수(웹 편집기에서 옮김) |
+| `web/wakaaka_text.js`, `web/lib/textcore.js` | Wakaaka Text·Simple 화면(자동완성 팝업, 정보 줄, Simple의 숨김), 자동완성 순수 함수(웹 편집기에서 옮김) |
 | `web/wakaaka.js` | 설정, 정보 줄, 읽기 전용 text, "웹에서 열기" |
 | `tests/` | 단위 테스트, 공통 테스트 세트 사본(`conformance/`), 예시 묶음(`data/`) |
 
@@ -130,7 +135,7 @@ python -I -m unittest discover -s tests -t .
 - `test_live.py`: 실제 서버와 curl 응답 비교. `WAKAAKA_LIVE_URL`(예: `http://127.0.0.1:3000`)을 줄 때만 돈다
 - `test_tags.py`: 태그 CSV 파서(두 키워드 표기), 검색 규칙, 가짜 Hugging Face로 받기·건너뛰기·교체·실패 시 유지
 - `test_tags_live.py`: 태그 검색을 실제 서버 `/api/tags/suggest`와 비교. `WAKAAKA_LIVE_URL`과 서버가 가져온 CSV(`WAKAAKA_TAGS_CSV`)를 줄 때만 돈다
-- `test_text.py`: Wakaaka Text(이름 해석, 줄 주석, 난수 경로, 묶음 엇갈림, 오프라인, 훅과 노드)
+- `test_text.py`: Wakaaka Text(이름 해석, 줄 주석, 난수 경로, 묶음 엇갈림, 오프라인, 훅과 노드), Simple이 훅을 거쳐 Text와 같은 결과·기록을 내는지
 
 자동완성 순수 함수는 Node 22로 따로 검사한다(의존성 없음).
 

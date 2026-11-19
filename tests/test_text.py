@@ -8,7 +8,7 @@ from wakaaka_node import client, hook, jcs, text as T
 from wakaaka_node.cache import Cache
 from wakaaka_node.expander import Expander, cleanup, derive, expand
 from wakaaka_node.fill import FillError
-from wakaaka_node.node import RUN_TOKEN, WakaakaText
+from wakaaka_node.node import NODE_CLASS_MAPPINGS, NODE_DISPLAY_NAME_MAPPINGS, RUN_TOKEN, WakaakaText, WakaakaTextSimple
 from wakaaka_node.settings import Settings, load
 from wakaaka_node.userlist import UserLists, suggest
 
@@ -313,6 +313,120 @@ class HookAndNode(Base):
             wf = {"nodes": [{"id": 3, "type": "WakaakaText", "widgets_values": ["", 0, "fixed", "", ""]}]}
             out = n.run("${hair}", 4, "", "", unique_id="3", extra_pnginfo={"workflow": wf})  # 링크로 들어온 경우
             self.assertEqual(out, (self.fill("${hair}", 4).text,))
+            self.assertEqual(wf["nodes"][0]["widgets_values"][-2], out[0])
+            self.assertEqual(sent[0][0], "wakaaka.text")
+        finally:
+            WakaakaText.fill_text = None
+            WakaakaText.send = None
+
+
+class Simple(Base):
+    """`Wakaaka Text (Simple)`: 화면만 다르고 채우기·기록·결과는 `Wakaaka Text`와 같다(DESIGN 8절)."""
+
+    TEXTS = [
+        "1girl, {smile|frown|grin}, \\{literal\\}",  # 참조 없음
+        "# 메모 ${없는것}\n${hair}, {a|b|c}\n${Eyes}, ${w:%s}" % CLOTH,  # 이름·대소문자·직접 ID·주석 줄
+        "${girl preset}, {1*a|2*b|3*c}, ${옷 > 상의}",
+        "${옛 이름}, x",  # 목록에 없는 이름: refs 표로만 찾는다
+    ]
+    REFS = json.dumps({"refs": {"옛 이름": HAIR}, "lock": {}})
+
+    def both(self, text, seed, refs):
+        wf = {"nodes": [
+            {"id": 5, "type": "WakaakaText", "widgets_values": ["", 0, "fixed", "", ""]},
+            {"id": 8, "type": "WakaakaTextSimple", "widgets_values": ["", 0, "fixed", "", ""],
+             "widgets_values_named": {"text": "", "seed": 0, "control_after_generate": "fixed", "result": "", "refs": ""}},
+        ]}
+        p = {"client_id": "c1", "extra_data": {"extra_pnginfo": {"workflow": wf}}, "prompt": {
+            "5": {"class_type": "WakaakaText", "inputs": {"text": text, "seed": seed, "result": "", "refs": refs}},
+            "8": {"class_type": "WakaakaTextSimple", "inputs": {"text": text, "seed": seed, "result": "", "refs": refs}},
+        }}
+        sent = []
+        hook.on_prompt(p, None, lambda *a: sent.append(a), "tok", lambda t, s, r: self.fill(t, s, r))
+        return p, wf, sent
+
+    def test_same_as_text_node(self):
+        for text in self.TEXTS:
+            for seed in [0, 1, 7, 12345, (1 << 64) - 1]:
+                p, wf, sent = self.both(text, seed, self.REFS)
+                a, b = p["prompt"]["5"]["inputs"], p["prompt"]["8"]["inputs"]
+                want = self.fill(text, seed, self.REFS)
+                self.assertEqual((b["result"], b["refs"]), (a["result"], a["refs"]), text)
+                self.assertEqual(b["result"], want.text)
+                self.assertEqual(json.loads(b["refs"])["run"], "tok")
+                self.assertEqual(wf["nodes"][1]["widgets_values"][-2:], wf["nodes"][0]["widgets_values"][-2:])
+                named = wf["nodes"][1]["widgets_values_named"]
+                self.assertEqual([named["result"], named["refs"]], wf["nodes"][0]["widgets_values"][-2:])
+                self.assertEqual(wf["nodes"][1]["widgets_values"][:3], ["", 0, "fixed"])  # 앞 위젯은 그대로
+                self.assertEqual([x[1]["node"] for x in sent], ["5", "8"])
+                self.assertEqual(sent[0][1] | {"node": "8"}, sent[1][1])
+
+    def test_refs_recorded_with_ids_and_lock(self):
+        p, wf, _ = self.both("${hair}, ${Eyes}", 3, "")
+        want = self.fill("${hair}, ${Eyes}", 3)
+        rv = json.loads(wf["nodes"][1]["widgets_values"][-1])
+        self.assertEqual(rv, {"refs": {"hair": HAIR, "Eyes": EYES}, "lock": dict(sorted(want.lock.items()))})
+        self.assertEqual(wf["nodes"][1]["widgets_values"][-2], want.text)
+
+    def test_errors_and_links_like_text_node(self):
+        p, _, _ = self.both("${nope}", 1, "")
+        self.assertEqual(p["prompt"]["8"]["inputs"]["refs"], p["prompt"]["5"]["inputs"]["refs"])
+        self.assertIn("찾을 수 없음", json.loads(p["prompt"]["8"]["inputs"]["refs"])["error"])
+        for k in ("text", "seed", "refs"):
+            inputs = {"text": "x", "seed": 1, "refs": ""} | {k: ["9", 0]}
+            p = {"prompt": {"8": {"class_type": "WakaakaTextSimple", "inputs": inputs}}}
+            hook.on_prompt(p, None, None, "tok", lambda *a: self.fail("링크면 훅이 채우지 않는다"))
+            self.assertNotIn("result", p["prompt"]["8"]["inputs"])
+
+    def test_subgraph(self):
+        wf = {
+            "nodes": [{"id": 12, "type": "sg-uuid", "widgets_values": []}],
+            "definitions": {"subgraphs": [{"id": "sg-uuid", "nodes": [
+                {"id": 3, "type": "WakaakaTextSimple", "widgets_values": ["", 0, "fixed", "", ""]}]}]},
+        }
+        p = {"prompt": {"12:3": {"class_type": "WakaakaTextSimple", "inputs": {"text": "${hair}", "seed": 2, "refs": ""}}},
+             "extra_data": {"extra_pnginfo": {"workflow": wf}}}
+        hook.on_prompt(p, None, None, "tok", lambda t, s, r: self.fill(t, s, r))
+        want = self.fill("${hair}", 2)
+        self.assertEqual(wf["definitions"]["subgraphs"][0]["nodes"][0]["widgets_values"][-2:],
+                         [want.text, T.dump_refs_value(want.refs, want.lock)])
+
+    def test_wildcard_hook_does_not_touch_simple(self):
+        wf = {"nodes": [{"id": 8, "type": "WakaakaTextSimple", "widgets_values": ["a", 0, "fixed", "r", "f"]}]}
+        self.assertFalse(hook.set_widgets(wf, "8", "t", "l"))  # Wildcard 종류로 찾으면 없음
+        self.assertEqual(wf["nodes"][0]["widgets_values"], ["a", 0, "fixed", "r", "f"])
+
+    def test_node_class(self):
+        self.assertIs(NODE_CLASS_MAPPINGS["WakaakaTextSimple"], WakaakaTextSimple)
+        self.assertEqual(NODE_DISPLAY_NAME_MAPPINGS["WakaakaTextSimple"], "Wakaaka Text (Simple)")
+        a, b = WakaakaText.INPUT_TYPES(), WakaakaTextSimple.INPUT_TYPES()
+        # 위젯 이름·순서가 같아야 훅의 set_widgets(맨 끝 둘)가 맞다
+        self.assertEqual([list(x) for x in b.values()], [list(x) for x in a.values()])
+        self.assertEqual(b["required"], a["required"])
+        self.assertEqual(b["required"]["text"][1]["dynamicPrompts"], False)
+        self.assertTrue(b["required"]["seed"][1]["control_after_generate"])
+        self.assertEqual(b["hidden"], a["hidden"])
+        self.assertEqual(b["optional"]["refs"], a["optional"]["refs"])
+        self.assertFalse(b["optional"]["result"][1]["multiline"])
+        self.assertTrue(a["optional"]["result"][1]["multiline"])  # 부모는 그대로
+        for k in ("RETURN_TYPES", "RETURN_NAMES", "FUNCTION", "CATEGORY"):
+            self.assertEqual(getattr(WakaakaTextSimple, k), getattr(WakaakaText, k))
+
+    def test_node_run(self):
+        sent = []
+        WakaakaText.fill_text = staticmethod(lambda t, s, r: self.fill(t, s, r))  # __init__.py처럼 부모에만 넣는다
+        WakaakaText.send = staticmethod(lambda *a: sent.append(a))
+        try:
+            n = WakaakaTextSimple()
+            self.assertEqual(n.run("x", 0, "kept", json.dumps({"refs": {}, "lock": {}, "run": RUN_TOKEN})), ("kept",))
+            self.assertEqual(WakaakaTextSimple.IS_CHANGED(refs=json.dumps({"run": RUN_TOKEN})), "")
+            self.assertNotEqual(WakaakaTextSimple.IS_CHANGED(refs=""), WakaakaTextSimple.IS_CHANGED(refs=""))  # NaN
+            with self.assertRaises(RuntimeError):
+                n.run("x", 0, "", json.dumps({"error": "문법 오류"}))
+            wf = {"nodes": [{"id": 3, "type": "WakaakaTextSimple", "widgets_values": ["", 0, "fixed", "", ""]}]}
+            out = n.run("${hair}", 4, "", "", unique_id="3", extra_pnginfo={"workflow": wf})  # 링크로 들어온 경우
+            self.assertEqual(out, (self.fill("${hair}", 4).text,))
+            self.assertEqual(out, WakaakaText().run("${hair}", 4, "", ""))
             self.assertEqual(wf["nodes"][0]["widgets_values"][-2], out[0])
             self.assertEqual(sent[0][0], "wakaaka.text")
         finally:

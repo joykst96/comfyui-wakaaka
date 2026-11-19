@@ -1,9 +1,9 @@
-"""노드 `Wakaaka Wildcard`와 `Wakaaka Text` (DESIGN 8절). ComfyUI에 묶이는 함수(채우기, send_sync)는 __init__.py가 넣어 준다."""
+"""노드 `Wakaaka Wildcard`, `Wakaaka Text`, `Wakaaka Text (Simple)` (DESIGN 8절). ComfyUI에 묶이는 함수(채우기, send_sync)는 __init__.py가 넣어 준다."""
 
 import secrets
 
 from .fill import FillError
-from .hook import NODE_TYPE, TEXT_TYPE, publish, publish_text
+from .hook import NODE_TYPE, TEXT_SIMPLE_TYPE, TEXT_TYPE, publish, publish_text
 from .ids import parse_lock_value
 from .text import parse_refs_value
 
@@ -108,5 +108,23 @@ class WakaakaText:
         return (r.text,)
 
 
-NODE_CLASS_MAPPINGS = {NODE_TYPE: WakaakaWildcard, TEXT_TYPE: WakaakaText}
-NODE_DISPLAY_NAME_MAPPINGS = {NODE_TYPE: "Wakaaka Wildcard", TEXT_TYPE: "Wakaaka Text"}
+class WakaakaTextSimple(WakaakaText):
+    """`Wakaaka Text`와 같은 일을 하고 화면에는 text와 seed만 보인다(DESIGN 8절 "노드 `Wakaaka Text (Simple)`").
+
+    전개·이름 해석·기록·IS_CHANGED·run은 부모 그대로다(fill_text·send도 부모 클래스 속성을 쓴다).
+    result·refs는 위젯 값으로 남아 훅이 채우고 PNG에 기록된다. 화면에서 숨기는 것은 web/wakaaka_text.js.
+    result를 한 줄 위젯으로 두는 것은 숨기기 위해서다: 여러 줄 위젯은 textarea(DOM 위젯)라서 숨김 처리가 렌더링마다 다르다.
+    값은 여러 줄이어도 그대로 저장된다.
+    """
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        t = super().INPUT_TYPES()
+        t["optional"]["result"] = ("STRING", {"default": "", "multiline": False, "tooltip": "큐에 넣을 때 채워지는 결과(화면에서는 숨김)."})
+        return t
+
+    DESCRIPTION = "Wakaaka Text와 같지만 텍스트 칸과 seed만 보인다. 결과와 참조 ID는 숨긴 채 이미지에 남는다."
+
+
+NODE_CLASS_MAPPINGS = {NODE_TYPE: WakaakaWildcard, TEXT_TYPE: WakaakaText, TEXT_SIMPLE_TYPE: WakaakaTextSimple}
+NODE_DISPLAY_NAME_MAPPINGS = {NODE_TYPE: "Wakaaka Wildcard", TEXT_TYPE: "Wakaaka Text", TEXT_SIMPLE_TYPE: "Wakaaka Text (Simple)"}

@@ -1,7 +1,8 @@
-// 노드 Wakaaka Text의 화면 쪽 (DESIGN 8절 "노드 `Wakaaka Text`", "노드의 자동완성").
+// 노드 Wakaaka Text와 Wakaaka Text (Simple)의 화면 쪽 (DESIGN 8절 "노드 `Wakaaka Text`", "노드 `Wakaaka Text (Simple)`", "노드의 자동완성").
 // - text 칸의 태그·와일드카드 자동완성. 뜨는 자리·넣는 표기는 웹과 같다(lib/textcore.js).
 // - result는 읽기 전용, refs는 숨김, 노드 아래 정보 줄에 참조한 이름과 아직 ID를 모르는 이름.
 // - 훅이 보낸 값(wakaaka.text)을 위젯에 반영한다.
+// - Simple은 result와 refs를 둘 다 숨기고 정보 줄을 만들지 않는다. 자동완성과 refs 기록은 같다.
 //
 // 캔버스 렌더링과 Vue 노드 렌더링 모두에서 동작해야 한다(NOTES 2026-11-19 단계 0). 두 방식은 textarea가 다르다.
 // - 캔버스: 위젯의 element가 그 textarea다.
@@ -12,7 +13,8 @@ import { app } from "../../scripts/app.js";
 import { api } from "../../scripts/api.js";
 import * as core from "./lib/textcore.js";
 
-const NODE = "WakaakaText";
+const SIMPLE = "WakaakaTextSimple";
+const NODES = new Set(["WakaakaText", SIMPLE]);
 const DEBOUNCE = 150;
 const CATEGORY_COLORS = { 0: "#5aa2ff", 1: "#ff6b6b", 3: "#c58cff", 4: "#55d17a", 5: "#ffa24d" };
 
@@ -29,10 +31,10 @@ function ownerOf(ta) {
   if (el) {
     if (ta.closest("[data-widget-name]")?.dataset.widgetName !== "text") return null;
     const node = currentGraph()?.getNodeById?.(Number(el.dataset.nodeId)) ?? currentGraph()?.getNodeById?.(el.dataset.nodeId);
-    return node?.comfyClass === NODE ? node : null;
+    return NODES.has(node?.comfyClass) ? node : null;
   }
   for (const node of currentGraph()?._nodes ?? []) {
-    if (node.comfyClass !== NODE) continue;
+    if (!NODES.has(node.comfyClass)) continue;
     const w = widget(node, "text");
     if (w && (w.element === ta || w.inputEl === ta)) return node;
   }
@@ -49,7 +51,7 @@ function findNode(execId) {
     if (!node) return null;
     if (i < parts.length - 1) graph = node.subgraph;
   }
-  return node?.comfyClass === NODE ? node : null;
+  return NODES.has(node?.comfyClass) ? node : null;
 }
 
 // ---------------------------------------------------------------- 정보 줄
@@ -74,11 +76,28 @@ function refreshInfoSoon(node) {
   node.wakaakaInfoTimer = setTimeout(() => refreshInfo(node), 200);
 }
 
-function setup(node) {
+/** 위젯을 숨긴다. 캔버스는 widget.hidden, Vue 노드는 options.hidden도 본다(프런트 1.57 deriveWidgetVisibility) */
+function hide(w) {
+  if (!w) return;
+  w.hidden = true;
+  w.options = { ...w.options, hidden: true };
+}
+
+/** Simple: text와 seed(와 생성 후 제어)만 보인다. result·refs는 값으로만 있어 훅이 채우고 PNG에 남는다 */
+function setupSimple(node) {
+  hide(widget(node, "result"));
+  hide(widget(node, "refs"));
+  // 노드를 만들 때 잰 크기에는 숨기기 전의 두 칸이 들어 있다. 높이만 다시 잰다(너비는 그대로)
+  const [w, h] = node.computeSize();
+  node.setSize?.([Math.max(node.size?.[0] ?? w, w), h]);
+}
+
+function setup(node, simple) {
   const text = widget(node, "text");
+  if (text?.element) text.element.placeholder = "프롬프트. ${ 로 와일드카드, 쉼표 뒤에서 태그 자동완성. # 로 시작하는 줄은 주석";
+  if (simple) return setupSimple(node);
   const result = widget(node, "result");
   const refs = widget(node, "refs");
-  if (text?.element) text.element.placeholder = "프롬프트. ${ 로 와일드카드, 쉼표 뒤에서 태그 자동완성. # 로 시작하는 줄은 주석";
   // result: 읽기 전용. 캔버스는 textarea의 readOnly, Vue 노드는 options.read_only를 본다(프런트 1.57 WidgetTextarea)
   if (result) {
     result.options = { ...result.options, read_only: true };
@@ -88,10 +107,7 @@ function setup(node) {
       result.element.placeholder = "큐에 넣으면 전개 결과가 채워집니다";
     }
   }
-  if (refs) {
-    refs.hidden = true;
-    refs.options = { ...refs.options, hidden: true };
-  }
+  hide(refs);
   const el = document.createElement("div");
   el.style.cssText = "font: 12px sans-serif; line-height: 1.5; padding: 2px 4px; opacity: 0.8; overflow: hidden;";
   const refsLine = el.appendChild(document.createElement("div"));
@@ -439,11 +455,11 @@ document.addEventListener("focusout", (e) => {
 app.registerExtension({
   name: "wakaaka.text",
   async beforeRegisterNodeDef(nodeType, nodeData) {
-    if (nodeData.name !== NODE) return;
+    if (!NODES.has(nodeData.name)) return;
     const created = nodeType.prototype.onNodeCreated;
     nodeType.prototype.onNodeCreated = function (...args) {
       const r = created?.apply(this, args);
-      setup(this);
+      setup(this, nodeData.name === SIMPLE);
       return r;
     };
     const configured = nodeType.prototype.onConfigure;

@@ -1,6 +1,7 @@
 """on-prompt 훅: 큐에 들어온 prompt에서 와카아카 노드를 찾아 채운다 (DESIGN 8절).
 
-`Wakaaka Wildcard`는 text와 lock을, `Wakaaka Text`는 result와 refs를 채운다. 두 노드 모두 아래 세 곳에 쓴다.
+`Wakaaka Wildcard`는 text와 lock을, `Wakaaka Text`와 `Wakaaka Text (Simple)`은 result와 refs를 채운다.
+두 텍스트 노드는 위젯 이름·순서가 같아 한 경로로 채운다(Simple은 화면에서 result·refs를 숨길 뿐이다).
 
 채운 값은 세 곳에 쓴다.
 1. `prompt[노드].inputs`: 실행 입력. lock에는 이번 프로세스의 표시(`run`)를 더해, 실행할 때 훅이 채운 값인지 안다.
@@ -22,6 +23,8 @@ NODE_TYPE = "WakaakaWildcard"
 EVENT = "wakaaka.fill"
 FILL_INPUTS = ("wildcard", "seed", "follow_latest", "lock")
 TEXT_TYPE = "WakaakaText"
+TEXT_SIMPLE_TYPE = "WakaakaTextSimple"
+TEXT_TYPES = (TEXT_TYPE, TEXT_SIMPLE_TYPE)
 TEXT_EVENT = "wakaaka.text"
 TEXT_INPUTS = ("text", "seed", "refs")
 
@@ -45,7 +48,7 @@ def on_prompt(json_data, fill_node, send, run_token, fill_text=None):
     for nid, node in json_data["prompt"].items():
         if not isinstance(node, dict) or not isinstance(node.get("inputs"), dict):
             continue
-        if node.get("class_type") == TEXT_TYPE and fill_text is not None:
+        if node.get("class_type") in TEXT_TYPES and fill_text is not None:
             _text_node(nid, node["inputs"], fill_text, workflow, send, sid, run_token)
             continue
         if node.get("class_type") != NODE_TYPE:
@@ -87,7 +90,7 @@ def publish_text(nid, r, inputs, workflow, send, sid, run_token):
         inputs["result"] = r.text
         inputs["refs"] = dump_refs_value(r.refs, r.lock, run=run_token)
     if isinstance(workflow, dict):
-        set_widgets(workflow, nid, r.text, value, TEXT_TYPE, ("result", "refs"))
+        set_widgets(workflow, nid, r.text, value, TEXT_TYPES, ("result", "refs"))
     if send is not None:
         send(TEXT_EVENT, {"node": str(nid), "result": r.text, "refs": value, "source": r.source}, sid)
 
@@ -107,7 +110,9 @@ def find_workflow_node(workflow, exec_id, node_type=NODE_TYPE):
     """실행 ID(서브그래프 안이면 `바깥:안`)로 워크플로 JSON의 노드를 찾는다.
 
     서브그래프 안 노드는 정의(definitions.subgraphs)에 있고 같은 서브그래프의 인스턴스끼리 공유한다.
+    node_type은 종류 이름 하나 또는 그 튜플이다.
     """
+    types = (node_type,) if isinstance(node_type, str) else tuple(node_type)
     subgraphs = {}
     defs = workflow.get("definitions")
     if isinstance(defs, dict) and isinstance(defs.get("subgraphs"), list):
@@ -123,12 +128,12 @@ def find_workflow_node(workflow, exec_id, node_type=NODE_TYPE):
             return None
         if i < len(parts) - 1:
             graph = subgraphs.get(node.get("type"))
-    return node if node.get("type") == node_type else None
+    return node if node.get("type") in types else None
 
 
 def set_widgets(workflow, exec_id, text, lock_value, node_type=NODE_TYPE, names=("text", "lock")):
     """위젯 순서는 wildcard, seed, (seed 제어), follow_latest, text, lock. text와 lock이 맨 끝 둘이다.
-    Text 노드는 text, seed, (seed 제어), result, refs라서 result와 refs가 맨 끝 둘이다(names로 이름을 준다).
+    Text 노드(Simple 포함)는 text, seed, (seed 제어), result, refs라서 result와 refs가 맨 끝 둘이다(names로 이름을 준다).
 
     프론트 1.57은 목록(`widgets_values`)과 이름별(`widgets_values_named`)을 함께 저장하므로 둘 다 고친다.
     """
