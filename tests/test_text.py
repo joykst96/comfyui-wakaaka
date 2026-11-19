@@ -530,6 +530,31 @@ class TidyThroughHook(Base):
         self.assertEqual(self.both("1girl,smile , {a|a}  b,\n\n\tlast ,", 9), "1girl, smile, a b,\n\nlast")  # 맨 끝 쉼표는 SPEC 4.4가 지운다
         self.assertEqual(self.both("{x}a,b", 0), "xa, b")  # 보기 하나짜리 {x}도 선택지
 
+    def test_condition_cases(self):
+        """적용 조건(DESIGN f29b4d1): 파싱 결과에 참조나 선택지가 하나라도 있을 때만. Text와 Simple은 both()가 같음을 본다."""
+        def raw(text):
+            with unittest.mock.patch.object(T, "tidy", lambda s: s):
+                return self.fill(text, 0).text
+
+        # 펼 것이 없다: 훅을 거친 결과가 전개기 결과와 바이트까지 같다
+        for text in ["a,b  c , d", "\\{a\\}", "\\{a\\} ,b  c", "# ${x}\na,b  c , d", "# ${messy}\n# {a|b}\na ,b"]:
+            self.assertEqual(self.both(text, 0).encode("utf-8"), raw(text).encode("utf-8"), repr(text))
+            self.assertFalse(T.to_stored(text, "", self.settings, userlists=self.users)[3], repr(text))
+        self.assertEqual(self.both("a,b  c , d", 0), "a,b  c , d")
+        # 펼 것이 있다: 결과 전체를 다듬는다
+        expanding = {
+            "${messy}  ,x": "red hair, blue eyes, smile, 1girl, x",  # 참조만(이름)
+            "${w:%s} ,x" % MESSY: "red hair, blue eyes, smile, 1girl, x",  # 참조만(ID 직접)
+            "{a|a}  ,b,c": "a, b, c",  # 선택지만
+            "${messy} ,{y|y}  z": "red hair, blue eyes, smile, 1girl, y z",  # 둘 다
+            "{${messy}|${messy}} ,q": "red hair, blue eyes, smile, 1girl, q",  # 선택지 안의 참조(중첩)
+            "\\{a\\} ,{b|b}  c": "{a}, b c",  # 이스케이프와 선택지가 함께면 다듬는다
+        }
+        for text, want in expanding.items():
+            self.assertTrue(T.to_stored(text, "", self.settings, userlists=self.users)[3], repr(text))
+            self.assertEqual(self.both(text, 0), want, repr(text))
+            self.assertEqual(self.both(text, 0), T.tidy(raw(text)), repr(text))
+
     def test_nothing_to_expand_is_left_as_typed(self):
         # 펼 것(참조·선택지)이 없으면 다듬지 않는다(DESIGN f29b4d1). SPEC 4.4 정리만 전개기가 한다
         cases = [
