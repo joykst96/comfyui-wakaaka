@@ -1,6 +1,9 @@
-# comfyui-wakaaka — Wakaaka Wildcard
+# comfyui-wakaaka — Wakaaka Wildcard, Wakaaka Text
 
-[와카아카](https://wakaaka.baepoyong.com) 와일드카드를 ID와 seed로 전개해 프롬프트 문자열(STRING)을 내는 ComfyUI 커스텀 노드.
+[와카아카](https://wakaaka.baepoyong.com) 와일드카드를 전개해 프롬프트 문자열(STRING)을 내는 ComfyUI 커스텀 노드 둘.
+
+- **Wakaaka Wildcard**: 와일드카드 ID 하나를 seed로 전개한다. 웹 미리보기와 같은 결과.
+- **Wakaaka Text**: 여러 줄 프롬프트 칸. 태그와 와일드카드 자동완성이 붙고, 와카아카 문법(`${이름}`, `{a|b}`, `{2*a|b}`)을 전개한다.
 
 와카아카는 프롬프트 와일드카드를 웹에서 편집·공유하는 서비스다. 웹, 서버, 이 노드가 같은 와일드카드와 seed에서 글자 단위로 같은 결과를 낸다. 서비스와 명세(`docs/SPEC.md`), 설계(`docs/DESIGN.md` 8절)는 와카아카 저장소 [joykst96/wakaaka](https://github.com/joykst96/wakaaka)에 있다.
 
@@ -38,21 +41,39 @@ New-Item -ItemType Junction -Path <ComfyUI>\custom_nodes\comfyui-wakaaka -Target
 
 "웹에서 열기" 버튼은 설정의 서버 주소로 그 와일드카드 페이지를 연다.
 
+### Wakaaka Text
+
+노드 **Wakaaka Text**(분류 `wakaaka`)는 ComfyUI 기본 여러 줄 문자열 노드처럼 쓴다. 출력 `text`를 `CLIPTextEncode` 등에 잇는다.
+
+| 위젯 | 내용 |
+|---|---|
+| `text` | 프롬프트. 와카아카 문법 전체를 쓴다. 첫 글자가 `#`인 줄은 주석(지워진다). 글자 `#`로 시작하는 줄은 `\#`로 쓴다 |
+| `seed` | 표준 seed 위젯 |
+| `result` | 읽기 전용. 큐에 넣을 때 전개 결과(최종 프롬프트)가 채워진다 |
+| `refs` | 숨김. 참조한 이름 → 와일드카드 ID와 그때의 lock |
+
+- **자동완성**: 칸 맨 앞·쉼표 뒤·선택지 `{` `|` 뒤에서 태그를 영문이나 한국어로 찾는다(`long h`, `긴 머리`). 고르면 밑줄은 공백, 괄호는 `\(` `\)`로 넣는다. 닫히지 않은 `${` 뒤에서는 설정한 유저의 와일드카드를 찾고, 고르면 `${이름}`을 넣고 `refs`에 ID를 적는다. ↑↓로 고르고 Enter·Tab으로 넣고 Esc로 닫는다. 캔버스 렌더링과 새 노드 렌더링(Vue) 모두에서 된다.
+- **이름과 ID**: 칸에는 `${이름}`이 보이고 `refs`에 ID가 남는다. 손으로 친 이름은 큐에 넣을 때 유저 목록에서 찾는다(노드 아래 정보 줄에 "ID를 찾을 이름"으로 보인다). PNG에 이름과 ID가 같이 남으므로, 이름이 바뀌거나 유저 아이디 설정이 다른 PC에서도 ID로 전개한다. `${w:ID}`를 직접 써도 된다.
+- **전개**: 항상 노드에서, 참조한 와일드카드의 최신 버전으로 한다(모드 설정과 상관없음). 서버에 연결할 수 없으면 캐시로 전개한다. `${X}` 하나뿐인 텍스트도 같은 seed의 Wakaaka Wildcard(ID X)와 결과가 다르다(텍스트가 한 단계 위의 문서로 전개되기 때문, 설계 8절). 웹 미리보기와 같은 결과가 필요하면 Wakaaka Wildcard를 쓴다.
+- 문법 오류, 찾을 수 없는 이름(모두 적는다), 받을 수 없는 와일드카드는 노드 오류로 낸다. 옛 결과가 조용히 나가지 않는다.
+
 큐에 넣을 때 노드가 text와 lock을 채워 실행 입력과 PNG 워크플로에 써 넣는다. 그래서 모든 이미지에 그때의 결과와 lock이 남는다. 옛 이미지를 다시 만들려면 PNG를 불러와 `follow_latest`를 끄고 큐에 넣는다.
 
 `wildcard`나 `seed`를 다른 노드에서 링크로 받으면 큐에 넣을 때 값을 알 수 없어 실행할 때 채운다. 이때도 PNG 워크플로에는 남지만, 화면의 text는 실행이 끝난 뒤에 바뀐다.
 
 ## 설정 (ComfyUI 설정 → Wakaaka)
 
-전개 모드와 서버 주소는 노드 위젯이 아니라 ComfyUI 설정 창에 있다. 두 모드는 결과가 같아서 워크플로마다 다르게 둘 이유가 없기 때문이다.
+전개 모드, 서버 주소, 유저 아이디는 노드 위젯이 아니라 ComfyUI 설정 창에 있다. 두 모드는 결과가 같아서 워크플로마다 다르게 둘 이유가 없기 때문이다.
 
-- 여는 곳: 왼쪽 아래 톱니바퀴(설정) → 왼쪽 목록 아래쪽 "기타"의 **Wakaaka** → "노드" 아래 **전개 모드**, **서버 주소**
+- 여는 곳: 왼쪽 아래 톱니바퀴(설정) → 왼쪽 목록 아래쪽 "기타"의 **Wakaaka** → "노드" 아래 **전개 모드**, **서버 주소**, **유저 아이디**, **작가 태그 앞에 @**
 - 설정 창 위쪽 검색에 `wakaaka`나 `전개 모드`를 쳐도 된다.
 
 | 설정 | 기본값 | 내용 |
 |---|---|---|
 | 전개 모드 `Wakaaka.Mode` | 서버 | 서버: 서버가 전개한 결과(`/api/w/{id}/resolve`)를 받는다. 로컬: 묶음(`/bundle`)을 받아 해시를 확인하고 이 PC에서 전개한다. 결과는 같다 |
 | 서버 주소 `Wakaaka.ServerUrl` | `https://wakaaka.baepoyong.com` | http(s)만. 직접 띄운 서버를 쓰려면 그 주소로 바꾼다 |
+| 유저 아이디 `Wakaaka.UserId` | 빈 값 | Wakaaka Text의 `${` 자동완성과 이름 해석에 쓸 와카아카 아이디 하나(영문·숫자·`_-` 3~32자). 비밀번호는 받지 않는다(모든 와일드카드가 공개). 유저 목록은 60초 캐시 |
+| 작가 태그 앞에 @ `Wakaaka.ArtistAt` | 꺼짐 | 켜면 태그 자동완성에서 작가 태그(분류 1)를 `@이름`으로 넣는다 |
 
 - 큐에 넣을 때의 훅은 누가 넣었는지 모르므로 `default` 사용자의 설정을 쓴다(`--multi-user`에서 사용자마다 다르게 둘 수 없다).
 - Windows에서 `localhost`는 IPv6(`::1`)를 먼저 시도해 서버가 IPv4에서만 들으면 요청마다 약 2초 늦다. 로컬 서버는 `http://127.0.0.1:포트`로 적는다.
@@ -67,7 +88,8 @@ New-Item -ItemType Junction -Path <ComfyUI>\custom_nodes\comfyui-wakaaka -Target
 ## 태그 인덱스 (자동완성용)
 
 - ComfyUI가 노드를 로딩할 때 백그라운드에서 Hugging Face [`mengod-hf/danbooru-tags-kr`](https://huggingface.co/datasets/mengod-hf/danbooru-tags-kr)의 최신 통합본(`danbooru-tags-kr-YYYY-MM-DD.csv`)을 확인한다. 파일 목록의 SHA-256이 지금 인덱스와 다를 때만 받아(약 27MB) SQLite 인덱스(약 110MB)로 바꾼다. 형식 검증을 통과해야 바꿔 넣고, 실패하거나 오프라인이면 기존 인덱스를 그대로 쓴다. ComfyUI 시작을 막지 않는다.
-- 위치는 `ComfyUI/user/__wakaaka/tags`. 받은 CSV는 변환 뒤 지우고 데이터셋 LICENSE(`LICENSE-danbooru-tags-kr`)를 옆에 둔다. 한국어 번역·설명·분류는 CC BY-SA 4.0이다.
+- 위치는 `ComfyUI/user/__wakaaka/tags/tags-<SHA-256 앞 16자>.sqlite`(약 110MB, 부분 일치용 FTS5 trigram 포함). 받은 CSV는 변환 뒤 지우고 데이터셋 LICENSE(`LICENSE-danbooru-tags-kr`)를 옆에 둔다.
+- 태그 데이터 출처: Hugging Face [`mengod-hf/danbooru-tags-kr`](https://huggingface.co/datasets/mengod-hf/danbooru-tags-kr). 한국어 번역·설명·분류·키워드는 CC BY-SA 4.0이다(데이터셋 LICENSE). 태그 이름과 포스트 수는 Danbooru에서 온 것이다.
 - 경로: `GET /wakaaka/tags/suggest?q=`(와카아카 서버 `/api/tags/suggest`와 같은 규칙과 응답, 최대 20개), `GET /wakaaka/tags/status`.
 
 ## 구조
@@ -82,6 +104,8 @@ New-Item -ItemType Junction -Path <ComfyUI>\custom_nodes\comfyui-wakaaka -Target
 | `wakaaka_node/expander.py` | 전개기(와카아카 `docs/SPEC.md`). TS 전개기와 글자 단위로 같은 결과 |
 | `wakaaka_node/jcs.py`, `bundle.py`, `cache.py` | 내용 해시, 묶음 검증, 캐시 |
 | `wakaaka_node/tagcsv.py`, `tagindex.py`, `tagupdate.py` | 태그 CSV 읽기, SQLite 인덱스와 검색, 받기·검증·교체 |
+| `wakaaka_node/text.py`, `userlist.py` | Wakaaka Text 전개(줄 주석, 이름 → ID, 묶음 합치기), 유저 와일드카드 목록 |
+| `web/wakaaka_text.js`, `web/lib/textcore.js` | Wakaaka Text 화면(자동완성 팝업, 정보 줄), 자동완성 순수 함수(웹 편집기에서 옮김) |
 | `web/wakaaka.js` | 설정, 정보 줄, 읽기 전용 text, "웹에서 열기" |
 | `tests/` | 단위 테스트, 공통 테스트 세트 사본(`conformance/`), 예시 묶음(`data/`) |
 
@@ -99,6 +123,16 @@ python -I -m unittest discover -s tests -t .
 - `test_live.py`: 실제 서버와 curl 응답 비교. `WAKAAKA_LIVE_URL`(예: `http://127.0.0.1:3000`)을 줄 때만 돈다
 - `test_tags.py`: 태그 CSV 파서(두 키워드 표기), 검색 규칙, 가짜 Hugging Face로 받기·건너뛰기·교체·실패 시 유지
 - `test_tags_live.py`: 태그 검색을 실제 서버 `/api/tags/suggest`와 비교. `WAKAAKA_LIVE_URL`과 서버가 가져온 CSV(`WAKAAKA_TAGS_CSV`)를 줄 때만 돈다
+- `test_text.py`: Wakaaka Text(이름 해석, 줄 주석, 난수 경로, 묶음 엇갈림, 오프라인, 훅과 노드)
+
+자동완성 순수 함수는 Node 22로 따로 검사한다(의존성 없음).
+
+```bash
+node --test
+```
+
+- `tests/js/textcore.test.mjs`: 와카아카 웹 편집기 vitest에서 옮긴 사례와 여러 줄 칸 사례
+- `tests/js/webdiff.test.mjs`: 와카아카 저장소의 원본 TS와 무작위 입력으로 직접 비교. `WAKAAKA_REPO`(와카아카 저장소 경로)를 줄 때만 돈다
 
 ## 라이선스
 

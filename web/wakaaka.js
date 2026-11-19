@@ -1,4 +1,4 @@
-// 와카아카 노드의 화면 쪽 (DESIGN 8절). 설정 두 개, 정보 줄, 읽기 전용 text, 접힌 lock, "웹에서 열기" 버튼.
+// 와카아카 노드의 화면 쪽 (DESIGN 8절). 설정 네 개(Wakaaka Text와 같이 쓴다), 정보 줄, 읽기 전용 text, 접힌 lock, "웹에서 열기" 버튼.
 // 결과를 채우는 것은 서버 훅이고, 여기서는 훅이 보낸 값(wakaaka.fill)을 위젯에 반영만 한다.
 import { app } from "../../scripts/app.js";
 import { api } from "../../scripts/api.js";
@@ -183,6 +183,22 @@ app.registerExtension({
       type: "text",
       defaultValue: DEFAULT_URL,
       tooltip: "http(s) 주소. 직접 띄운 서버는 예: http://127.0.0.1:3000",
+    },
+    {
+      id: "Wakaaka.UserId",
+      name: "유저 아이디",
+      category: ["Wakaaka", "노드", "유저 아이디"],
+      type: "text",
+      defaultValue: "", // wakaaka_node/settings.py와 같게
+      tooltip: "Wakaaka Text에서 ${ 를 치면 이 유저의 와일드카드를 찾습니다. 비밀번호는 필요 없습니다(모든 와일드카드가 공개). 영문·숫자·_- 3~32자.",
+    },
+    {
+      id: "Wakaaka.ArtistAt",
+      name: "작가 태그 앞에 @",
+      category: ["Wakaaka", "노드", "작가 태그 @"],
+      type: "boolean",
+      defaultValue: false, // wakaaka_node/settings.py와 같게
+      tooltip: "켜면 태그 자동완성에서 작가 태그(분류 1)를 고를 때 @를 붙여 넣습니다(예: Anima 계열 모델).",
     },
   ],
   async beforeRegisterNodeDef(nodeType, nodeData) {
