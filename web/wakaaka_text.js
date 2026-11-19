@@ -68,10 +68,10 @@ function refreshInfo(node) {
   info.note.textContent = parts.join(" · ");
 }
 
-let infoTimer = 0;
+/** 노드마다 따로 늦춘다(전역 타이머 하나면 다른 노드의 갱신을 취소한다) */
 function refreshInfoSoon(node) {
-  clearTimeout(infoTimer);
-  infoTimer = setTimeout(() => refreshInfo(node), 200);
+  clearTimeout(node.wakaakaInfoTimer);
+  node.wakaakaInfoTimer = setTimeout(() => refreshInfo(node), 200);
 }
 
 function setup(node) {
@@ -136,6 +136,7 @@ const S = {
   timer: 0,
   composing: false,
   suppress: false, // 고른 직후의 input 이벤트는 다시 찾지 않는다
+  pressed: null, // 목록에서 누른 항목 {item, comp}. 누르는 동안(mousedown~click)은 닫지 않는다
   popup: null,
 };
 window.__wakaakaText = S; // 시험용
@@ -149,15 +150,17 @@ function popupEl() {
     "background: var(--comfy-menu-bg, #202020)", "color: var(--input-text, #ddd)", "border: 1px solid var(--border-color, #555)",
     "border-radius: 6px", "box-shadow: 0 6px 18px rgba(0,0,0,.45)", "font: 13px/1.35 sans-serif", "padding: 3px 0",
   ].join(";");
-  // 고르는 동안 textarea의 포커스를 지킨다. 한글 조합 중이면 기본 동작으로 조합을 끝내고 click에서 고른다
+  // 고르는 동안 textarea의 포커스를 지킨다. 한글 조합 중이면 기본 동작으로 조합을 끝내고(칸이 blur된다) click에서 고른다.
+  // 누른 항목은 인덱스가 아니라 값으로 잡아 둔다: 그 사이 목록이 다시 그려져도 누른 것을 넣는다
   p.addEventListener("mousedown", (e) => {
+    const row = e.target.closest?.("[data-i]");
+    S.pressed = row ? { item: S.items[Number(row.dataset.i)], comp: S.comp } : null;
     if (!S.composing) e.preventDefault();
   });
-  p.addEventListener("click", (e) => {
-    const row = e.target.closest?.("[data-i]");
-    if (!row) return;
-    S.sel = Number(row.dataset.i);
-    pick();
+  p.addEventListener("click", () => {
+    const pressed = S.pressed;
+    S.pressed = null;
+    if (pressed?.item) pick(pressed.item, pressed.comp);
   });
   document.body.appendChild(p);
   S.popup = p;
@@ -165,6 +168,7 @@ function popupEl() {
 }
 
 function close() {
+  S.pressed = null;
   S.seq++;
   clearTimeout(S.timer);
   S.items = [];
@@ -293,6 +297,8 @@ async function query() {
     if (r?.state === "stale" && items.length) status = "서버에 연결하지 못해 마지막으로 받은 목록입니다";
   }
   if (seq !== S.seq || ta !== S.ta) return; // 그 사이 다시 쳤다
+  // 늦게 온 응답: 받는 동안 다른 곳을 눌렀거나 커서를 옮겼으면 그 자리의 목록이 아니다(검토 1번)
+  if (!core.completionStillValid(comp, ta.value, ta.selectionStart, ta.selectionEnd)) return close();
   S.comp = comp;
   S.items = items;
   S.status = status;
@@ -305,11 +311,15 @@ function schedule() {
   S.timer = setTimeout(query, DEBOUNCE);
 }
 
-function pick() {
-  const it = S.items[S.sel];
-  const { ta, node, comp } = S;
-  if (!it || !ta || !comp) return;
-  const to = Math.max(comp.from, ta.selectionStart); // 한글 조합을 끝낸 뒤라도 커서까지
+/** 고른 항목을 넣는다. 자리가 요청 때와 달라졌으면 넣지 않고 false(검토 1번) */
+function pick(it = S.items[S.sel], comp = S.comp) {
+  const { ta, node } = S;
+  if (!it || !ta || !comp) return false;
+  if (!core.completionStillValid(comp, ta.value, ta.selectionStart, ta.selectionEnd)) {
+    close();
+    return false;
+  }
+  const to = comp.to;
   let insert;
   if (it.kind === "tag") insert = core.tagCompletionText(it.tag, comp, setting("Wakaaka.ArtistAt", false) === true);
   else insert = "${" + it.w.name + "}";
@@ -328,6 +338,7 @@ function pick() {
   }
   refreshInfo(node);
   node.setDirtyCanvas?.(true, true);
+  return true;
 }
 
 // ---------------------------------------------------------------- 문서 전체 이벤트
@@ -339,6 +350,7 @@ document.addEventListener(
     if (!node) return;
     refreshInfoSoon(node);
     if (S.suppress) return;
+    S.seq++; // 나간 요청의 응답은 버린다(새로 친 글자로 다시 찾는다)
     S.ta = e.target;
     S.node = node;
     schedule();
@@ -360,6 +372,17 @@ document.addEventListener(
     }
     if (["ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"].includes(k)) return close();
     if (!S.items.length || !["ArrowUp", "ArrowDown", "Enter", "Tab"].includes(k) || e.shiftKey || e.ctrlKey || e.altKey || e.metaKey) return;
+    if (!core.completionStillValid(S.comp, S.ta.value, S.ta.selectionStart, S.ta.selectionEnd)) {
+      // 목록이 지금 자리의 것이 아니다(더 쳤는데 새 목록이 아직 안 옴). 옛 1순위를 넣지 않는다
+      close();
+      if (k === "Enter" || k === "Tab") {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        query();
+      }
+      return;
+    }
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
@@ -380,10 +403,22 @@ document.addEventListener("compositionend", (e) => {
   schedule();
 }, true);
 
+// 칸 안을 눌러 커서를 옮겼으면 그 자리의 목록이 아니므로 닫는다
+document.addEventListener("click", (e) => {
+  if (e.target !== S.ta || !isOpen() || !S.comp) return;
+  if (!core.completionStillValid(S.comp, S.ta.value, S.ta.selectionStart, S.ta.selectionEnd)) close();
+}, true);
+
 // 칸 밖을 누르거나 어디든 스크롤하면 닫는다(목록 안 스크롤은 빼고)
 document.addEventListener("pointerdown", (e) => {
   if (!isOpen() || e.target === S.ta || S.popup?.contains(e.target)) return;
   close();
+}, true);
+// 목록을 누른 채 밖에서 뗐으면(click이 없다) 누름을 풀고, 칸이 포커스를 잃었으면 닫는다
+document.addEventListener("pointerup", (e) => {
+  if (!S.pressed || S.popup?.contains(e.target)) return;
+  S.pressed = null;
+  if (document.activeElement !== S.ta) close();
 }, true);
 document.addEventListener("wheel", (e) => {
   if (isOpen() && !S.popup?.contains(e.target)) close();
@@ -395,7 +430,7 @@ window.addEventListener("resize", () => isOpen() && close());
 document.addEventListener("focusout", (e) => {
   if (e.target !== S.ta) return;
   setTimeout(() => {
-    if (document.activeElement !== S.ta && !S.composing) close();
+    if (document.activeElement !== S.ta && !S.composing && !S.pressed) close();
   }, 150);
 }, true);
 

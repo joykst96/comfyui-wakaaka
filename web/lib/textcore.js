@@ -319,3 +319,18 @@ export function unresolvedNames(names, value) {
   const known = new Set(Object.keys(parseRefsValue(value).refs).map((k) => k.toLowerCase()));
   return names.filter((n) => !known.has(n.toLowerCase()));
 }
+
+/** 두 자동완성 자리가 같은지(종류, 범위, 질의, 선택지 안, 줄 맨 앞) */
+export function sameCompletion(a, b) {
+  if (!a || !b) return false;
+  return a.kind === b.kind && a.from === b.from && a.to === b.to && a.query === b.query && a.inChoice === b.inChoice && a.atStart === b.atStart;
+}
+
+/**
+ * 요청할 때의 자리(comp)가 지금 칸의 값·커서에서도 그대로인지. 응답을 그리기 직전과 고르기 직전에 본다.
+ * 그 사이 더 쳤거나(질의가 바뀜), 다른 곳을 눌렀거나(자리가 바뀜), 범위를 골랐으면 false다.
+ */
+export function completionStillValid(comp, text, selStart, selEnd) {
+  if (selStart !== selEnd) return false;
+  return sameCompletion(comp, completionAt(text, selStart));
+}

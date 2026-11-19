@@ -281,3 +281,43 @@ describe("이름 참조와 refs 표", () => {
     assert.equal(tagSummary({ body: "long hair", keywords: ["긴 머리", "장발"] }), "긴 머리, 장발");
   });
 });
+
+// ---------------------------------------------------------------- 늦게 온 응답 (검토 1번)
+
+import { completionStillValid, sameCompletion } from "../../web/lib/textcore.js";
+
+describe("completionStillValid: 응답을 그리거나 고르기 직전에 자리가 그대로인지", () => {
+  const text = "1girl, ${fo\nsmile, cat ears\nlast line";
+  const at = text.indexOf("\n"); // ${fo 끝
+  const comp = completionAt(text, at);
+  test("요청 때와 같은 값·커서면 그대로", () => {
+    assert.deepEqual(comp, { kind: "ref", from: 7, to: 11, query: "fo" });
+    assert.equal(completionStillValid(comp, text, at, at), true);
+  });
+  test("시나리오 A: 받는 동안 같은 칸의 아래 줄을 눌렀다", () => {
+    assert.equal(completionStillValid(comp, text, text.length, text.length), false);
+    assert.equal(completionStillValid(comp, text, at + 3, at + 3), false);
+  });
+  test("시나리오 B: 커서를 자리 앞으로 옮겼다", () => {
+    for (const c of [0, 3, 7, 8, 9, 10]) assert.equal(completionStillValid(comp, text, c, c), false, String(c));
+  });
+  test("시나리오 C: ${fo → ${foo2로 더 쳤다", () => {
+    const more = text.replace("${fo", "${foo2");
+    const c = more.indexOf("\n");
+    assert.equal(completionStillValid(comp, more, c, c), false);
+    assert.equal(completionStillValid(completionAt(more, c), more, c, c), true);
+  });
+  test("범위를 골랐거나 글자를 지웠다", () => {
+    assert.equal(completionStillValid(comp, text, at - 2, at), false);
+    const less = text.replace("${fo", "${f");
+    assert.equal(completionStillValid(comp, less, at - 1, at - 1), false);
+  });
+  test("태그 자리도 선택지 안 여부까지 같아야 한다", () => {
+    const t = "{a|lo";
+    const c = completionAt(t, t.length);
+    assert.equal(completionStillValid(c, t, t.length, t.length), true);
+    assert.equal(sameCompletion(c, { ...c, inChoice: false }), false);
+    assert.equal(completionStillValid(c, "{a}|lo", 6, 6), false);
+    assert.equal(sameCompletion(null, c), false);
+  });
+});
