@@ -88,7 +88,8 @@ function setup(node) {
   const lock = widget(node, "lock");
   const follow = widget(node, "follow_latest");
 
-  // text: 읽기 전용(훅이 채운다)
+  // text: 읽기 전용(훅이 채운다). 캔버스는 textarea의 readOnly, Vue 노드는 options.read_only를 본다(프런트 1.57 WidgetTextarea)
+  if (text) text.options = { ...text.options, read_only: true };
   if (text?.element) {
     text.element.readOnly = true;
     text.element.style.opacity = "0.85";
