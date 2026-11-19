@@ -5,7 +5,8 @@
 3. 항목 하나짜리 임시 루트 문서 `{"schema":1,"items":[{"id":"t","text":…}]}`로 감싼다. 항목 id `t`는 난수 경로에 들어가므로 바꾸지 않는다.
 4. 참조된 ID마다 최신 묶음을 받아 합친다(lock·docs 합집합, root는 임시 루트). 같은 ID의 해시가 엇갈리면 한 번 다시 받고, 그래도면 오류.
 5. maxDepth 17로 전개한다(임시 루트가 깊이를 1 더한다). maxExpansions는 텍스트 전체가 함께 쓴다.
-6. 전개 결과(SPEC 4.4 정리까지 끝난 것)의 띄어쓰기를 다듬는다(`tidy`, DESIGN 8절 "결과 다듬기"). Wakaaka Wildcard에는 없는 노드 규칙이다.
+6. 펼 것(참조나 선택지)이 하나라도 있으면 전개 결과(SPEC 4.4 정리까지 끝난 것) 전체의 띄어쓰기를 다듬는다(`tidy`,
+   DESIGN 8절 "결과 다듬기"). 없으면 전개기 결과 그대로다. Wakaaka Wildcard에는 없는 노드 규칙이다.
 
 모드와 상관없이 노드에서 전개한다(서버에는 임의 텍스트를 전개하는 엔드포인트가 없다). 항상 최신으로 전개하고 lock은 기록만 한다.
 서버에 연결할 수 없으면 기존 로컬 모드처럼 마지막으로 받은 최신 lock의 캐시로 전개한다. 최신 lock은 Text 자기 기록(`latest-text/`)을
@@ -124,11 +125,15 @@ def _reject(name):
 
 
 def to_stored(text, refs_value, settings, client=None, userlists=None):
-    """주석 줄을 지우고 이름을 ID로 바꾼다. 반환: (저장 형태 텍스트, 이름 → ID, 참조된 ID 목록(순서대로, 겹침 없음))."""
+    """주석 줄을 지우고 이름을 ID로 바꾼다.
+
+    반환: (저장 형태 텍스트, 이름 → ID, 참조된 ID 목록(순서대로, 겹침 없음), 펼 것(참조·선택지)이 있는지).
+    펼 것은 파싱 결과로 본다: 이스케이프한 `\\{`·`\\$`는 글자라서 펼 것이 아니다.
+    """
     src = strip_comment_lines(text)
     spans = []
     try:
-        parse(src, "edit", spans)
+        ast = parse(src, "edit", spans)
     except ExpandError as e:
         raise FillError(f"문법 오류: {SYNTAX_MESSAGES.get(e.code, e.code)} ({e.code})") from None
     table = {k.lower(): v for k, v in parse_refs_value(refs_value).get("refs", {}).items()}
@@ -170,7 +175,8 @@ def to_stored(text, refs_value, settings, client=None, userlists=None):
         if wid not in ids:
             ids.append(wid)
     out.append(src[at:])
-    return "".join(out), {n: resolved[n] for n in names}, ids
+    expands = any(not isinstance(x, str) for x in ast)  # 맨 위의 Choice·Ref(안쪽 것은 바깥 선택지가 있다는 뜻)
+    return "".join(out), {n: resolved[n] for n in names}, ids, expands
 
 
 def _latest(wid, client, cache):
@@ -220,7 +226,7 @@ def fill_text(text, seed, refs_value, settings, client=None, cache=None, userlis
     if settings.url is None:
         raise FillError(f"와카아카 서버 주소 설정이 올바르지 않음: {settings.raw_url!r} (설정 → Wakaaka)")
     client = client or Client(settings.url)
-    stored, refs, ids = to_stored(text, refs_value, settings, client, userlists)
+    stored, refs, ids, expands = to_stored(text, refs_value, settings, client, userlists)
     got = [_latest(wid, client, cache) for wid in ids]
     merged, clash = _merge([b for b, _ in got])
     if merged is None:  # 받는 사이에 하위 와일드카드가 갱신됨: 한 번 다시 받는다
@@ -238,4 +244,5 @@ def fill_text(text, seed, refs_value, settings, client=None, cache=None, userlis
     except ExpandError as e:
         raise FillError(f"전개하지 못함: {e.code}" + (f" ({e.wildcard})" if e.wildcard else "")) from None
     source = "cache" if any(s == "cache" for _, s in got) else "local"
-    return TextResult(tidy(out), refs, lock, source)
+    # 펼 것이 없으면 손으로 친 텍스트이므로 친 대로 둔다(SPEC 4.4 정리는 전개기가 이미 했다)
+    return TextResult(tidy(out) if expands else out, refs, lock, source)

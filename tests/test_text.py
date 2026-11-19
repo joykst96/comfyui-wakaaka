@@ -526,17 +526,36 @@ class TidyThroughHook(Base):
         self.assertEqual(self.both("${messy}", 0), "red hair, blue eyes, smile, 1girl")
         self.assertEqual(self.both("masterpiece ,${messy},{best  quality}\n  ${messy} , x  ", 3),
                          "masterpiece, red hair, blue eyes, smile, 1girl, best quality\nred hair, blue eyes, smile, 1girl, x")
-        # 참조 없는 텍스트
+        # 참조 없이 선택지만 있는 텍스트도 전체를 다듬는다
         self.assertEqual(self.both("1girl,smile , {a|a}  b,\n\n\tlast ,", 9), "1girl, smile, a b,\n\nlast")  # 맨 끝 쉼표는 SPEC 4.4가 지운다
+        self.assertEqual(self.both("{x}a,b", 0), "xa, b")  # 보기 하나짜리 {x}도 선택지
+
+    def test_nothing_to_expand_is_left_as_typed(self):
+        # 펼 것(참조·선택지)이 없으면 다듬지 않는다(DESIGN f29b4d1). SPEC 4.4 정리만 전개기가 한다
+        cases = [
+            ("1girl,smile ,  b", "1girl,smile ,  b"),
+            ("a,b\n c ,d", "a,b\n c ,d"),
+            (",a ,, b,", "a , b"),  # SPEC 4.4: 빈 조각과 맨 앞뒤 쉼표만 지움
+            ("\\{x\\},y  z", "{x},y  z"),  # 이스케이프한 { }는 글자: 펼 것이 아니다
+            ("$5 ,y  z", "$5 ,y  z"),  # { 가 따르지 않는 $는 글자
+            ("\\${hair},y  z", "$hair, y z"),  # 이 경우는 $만 이스케이프되고 {hair}는 보기 하나짜리 선택지라 다듬는다
+            ("# ${hair} {a|b}\nx,y  z", "x,y  z"),  # 주석 줄을 지운 뒤에 본다
+            ("1,000  steps", "1,000  steps"),
+        ]
+        for text, want in cases:
+            self.assertEqual(self.both(text, 5), want, repr(text))
+        self.assertEqual(self.requests("/api/"), [])
 
     def test_result_equals_tidy_of_raw(self):
-        texts = ["${hair} ,${Eyes},{smile|frown}  x", "${girl preset},${옷 > 상의} ,  {1*a|2*b|3*c}", "a,b\n c ,d"]
+        texts = ["${hair} ,${Eyes},{smile|frown}  x", "${girl preset},${옷 > 상의} ,  {1*a|2*b|3*c}", "a,b\n c ,d", "{a , b|c}  d,e"]
         for t in texts:
+            expands = T.to_stored(t, "", self.settings, userlists=self.users)[3]
+            self.assertEqual(expands, t != "a,b\n c ,d", t)
             for seed in range(20):
                 with unittest.mock.patch.object(T, "tidy", lambda s: s):
                     raw = self.fill(t, seed).text
                 got = self.both(t, seed)
-                self.assertEqual(got, T.tidy(raw), (t, seed))
+                self.assertEqual(got, T.tidy(raw) if expands else raw, (t, seed))
 
     def test_wildcard_node_untouched(self):
         # Wakaaka Wildcard는 다듬지 않는다: 전개기 결과 그대로
