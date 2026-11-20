@@ -195,11 +195,33 @@ app.registerExtension({
     },
     {
       id: "Wakaaka.ArtistAt",
-      name: "작가 태그 앞에 @",
-      category: ["Wakaaka", "노드", "작가 태그 @"],
+      // 이름·분류에 @ { } 를 쓰지 않는다: 프런트 1.57이 설정 화면에서 이름을 vue-i18n 메시지로 컴파일해 SyntaxError가 나고 그 항목이 빠진다
+      // (2026-11-20 실측. 설명(tooltip)은 괜찮다)
+      name: "작가 태그 앞에 골뱅이(at) 붙이기",
+      category: ["Wakaaka", "노드", "작가 태그 골뱅이"],
       type: "boolean",
       defaultValue: false, // wakaaka_node/settings.py와 같게
-      tooltip: "켜면 태그 자동완성에서 작가 태그(분류 1)를 고를 때 @를 붙여 넣습니다(예: Anima 계열 모델).",
+      tooltip: "켜면 태그 자동완성에서 작가 태그(분류 1)를 고를 때 @를 붙여 넣습니다(예: Anima 계열 모델). 태그 자동완성이 켜져 있을 때만 뜻이 있습니다.",
+    },
+    // 자동완성 켜고 끄기(DESIGN 8절 "켜고 끄기"). 바꾸면 새로 고침 없이 바로 적용된다: wakaaka_text.js가 이벤트를 받아 꺼진 종류의 목록을 닫는다.
+    // 프런트 1.57은 값을 바꾼 뒤 onChange를 부르므로 그 안에서 읽으면 새 값이다.
+    {
+      id: "Wakaaka.TagAutocomplete",
+      name: "자동완성 (태그)",
+      category: ["Wakaaka", "노드", "자동완성 (태그)"],
+      type: "boolean",
+      defaultValue: true, // wakaaka_node/settings.py와 같게
+      tooltip: "Wakaaka Text의 텍스트 칸에서 태그 자동완성을 띄웁니다. 다른 자동완성 확장을 쓰면 끄세요. 꺼져 있으면 ComfyUI를 띄울 때 태그 목록도 확인하지 않습니다(다시 켜면 첫 검색 때 확인).",
+      onChange: () => window.dispatchEvent(new CustomEvent("wakaaka-autocomplete-settings")),
+    },
+    {
+      id: "Wakaaka.WildcardAutocomplete",
+      name: "자동완성 (와일드카드)",
+      category: ["Wakaaka", "노드", "자동완성 (와일드카드)"],
+      type: "boolean",
+      defaultValue: true, // wakaaka_node/settings.py와 같게
+      tooltip: "Wakaaka Text의 텍스트 칸에서 ${ 뒤에 와일드카드 목록을 띄웁니다. 꺼도 손으로 친 ${이름}은 큐에 넣을 때 그대로 찾습니다.",
+      onChange: () => window.dispatchEvent(new CustomEvent("wakaaka-autocomplete-settings")),
     },
   ],
   async beforeRegisterNodeDef(nodeType, nodeData) {

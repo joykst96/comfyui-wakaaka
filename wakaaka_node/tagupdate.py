@@ -127,6 +127,18 @@ class _NoDowngrade(urllib.request.HTTPRedirectHandler):
 _opener = urllib.request.build_opener(_NoDowngrade)
 
 
+def _spawn(target):
+    threading.Thread(target=target, name="wakaaka-tags", daemon=True).start()
+
+
+def on_load(tags, settings, spawn=None):
+    """ComfyUI가 노드를 불러올 때(default 사용자의 설정). 태그 자동완성이 켜져 있을 때만 확인을 시작한다. 시작했으면 True."""
+    if settings.tag_autocomplete:
+        return tags.start_refresh(spawn)
+    tags.skip_refresh()
+    return False
+
+
 class TagIndex:
     """인덱스 폴더 하나. suggest·status는 어느 스레드에서 불러도 된다."""
 
@@ -143,7 +155,25 @@ class TagIndex:
         self._error = None
         self._license_error = None
         self._checked_at = None
+        self._check = "pending"  # pending(아직 정하지 않음), off(태그 자동완성이 꺼져 있어 확인하지 않음), started
         self._load()
+
+    # ------------------------------------------------------------ 확인 시작 (DESIGN 8절 "켜고 끄기")
+
+    def start_refresh(self, spawn=None):
+        """최신 확인·받기를 백그라운드로 한 번만 시작한다. 이번에 시작했으면 True, 이미 시작했으면 False."""
+        with self._lock:
+            if self._check == "started":
+                return False
+            self._check = "started"
+        (spawn or _spawn)(self.refresh)
+        return True
+
+    def skip_refresh(self):
+        """로딩 때 태그 자동완성이 꺼져 있었다: 확인하지 않는다. 이미 만든 인덱스는 그대로 쓴다(지우지 않는다)."""
+        with self._lock:
+            if self._check == "pending":
+                self._check = "off"
 
     # ------------------------------------------------------------ 읽기
 
@@ -207,6 +237,7 @@ class TagIndex:
                 "error": error,
                 "checkedAt": self._checked_at,
                 "licenseError": self._license_error,
+                "check": self._check,  # off: 태그 자동완성이 꺼져 있어 확인하지 않음(켠 뒤 첫 검색에서 시작)
             }
         if meta:
             out.update({k: meta.get(k) for k in ("file", "sha256", "size", "rows", "builtAt")})

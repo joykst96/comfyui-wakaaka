@@ -330,7 +330,25 @@ export function sameCompletion(a, b) {
  * 요청할 때의 자리(comp)가 지금 칸의 값·커서에서도 그대로인지. 응답을 그리기 직전과 고르기 직전에 본다.
  * 그 사이 더 쳤거나(질의가 바뀜), 다른 곳을 눌렀거나(자리가 바뀜), 범위를 골랐으면 false다.
  */
-export function completionStillValid(comp, text, selStart, selEnd) {
+export function completionStillValid(comp, text, selStart, selEnd, enabled = ALL_ON) {
   if (selStart !== selEnd) return false;
-  return sameCompletion(comp, completionAt(text, selStart));
+  return sameCompletion(comp, completionFor(text, selStart, enabled));
+}
+
+const ALL_ON = Object.freeze({ tag: true, wildcard: true });
+
+/** 이 종류의 자동완성이 켜져 있는지(설정 Wakaaka.TagAutocomplete, Wakaaka.WildcardAutocomplete) */
+export function kindEnabled(kind, enabled = ALL_ON) {
+  return kind === "tag" ? enabled.tag !== false : kind === "ref" ? enabled.wildcard !== false : false;
+}
+
+/**
+ * 켜진 종류만 남긴 completionAt (DESIGN 8절 "켜고 끄기", 노드 규칙이라 웹 원본에는 없다).
+ * 꺼진 종류의 자리면 null이다. `${` 뒤에서 와일드카드가 꺼져 있으면 태그로 바꿔 찾지 않는다(그 자리는 null).
+ * 둘 다 꺼져 있으면 언제나 null.
+ */
+export function completionFor(text, cursor, enabled = ALL_ON) {
+  if (!kindEnabled("tag", enabled) && !kindEnabled("ref", enabled)) return null;
+  const c = completionAt(text, cursor);
+  return c && kindEnabled(c.kind, enabled) ? c : null;
 }

@@ -20,6 +20,12 @@ const CATEGORY_COLORS = { 0: "#5aa2ff", 1: "#ff6b6b", 3: "#c58cff", 4: "#55d17a"
 
 const widget = (node, name) => node?.widgets?.find((w) => w.name === name);
 const setting = (id, fallback) => app.extensionManager?.setting?.get(id) ?? fallback;
+/** 켜진 자동완성 종류(DESIGN 8절 "켜고 끄기"). 이벤트마다 읽으므로 설정을 바꾸면 새로 고침 없이 바로 적용된다 */
+const enabled = () => ({
+  tag: setting("Wakaaka.TagAutocomplete", true) !== false,
+  wildcard: setting("Wakaaka.WildcardAutocomplete", true) !== false,
+});
+const anyEnabled = () => { const en = enabled(); return en.tag || en.wildcard; };
 const currentGraph = () => app.canvas?.graph ?? app.graph;
 
 // ---------------------------------------------------------------- textarea → 노드
@@ -62,7 +68,8 @@ function refreshInfo(node) {
   const names = core.nameRefs(widget(node, "text")?.value ?? "");
   const refs = widget(node, "refs")?.value ?? "";
   const unknown = core.unresolvedNames(names, refs);
-  info.refs.textContent = names.length ? "참조: " + names.join(", ") : "참조 없음 · ${ 를 치면 와일드카드를 찾습니다";
+  const hint = enabled().wildcard ? " · ${ 를 치면 와일드카드를 찾습니다" : "";
+  info.refs.textContent = names.length ? "참조: " + names.join(", ") : "참조 없음" + hint;
   info.refs.title = names.join("\n");
   const parts = [];
   if (unknown.length) parts.push("큐에 넣을 때 ID를 찾을 이름: " + unknown.join(", "));
@@ -144,7 +151,7 @@ function setup(node, simple) {
 const S = {
   ta: null, // 지금 보는 textarea
   node: null,
-  comp: null, // core.completionAt 결과
+  comp: null, // core.completionFor 결과(켜진 종류만)
   items: [], // {kind:"tag", tag} | {kind:"ref", w}
   sel: 0,
   status: "", // 목록 대신 보일 안내 한 줄
@@ -294,7 +301,7 @@ const REF_STATUS = {
 async function query() {
   const ta = S.ta;
   if (!ta || ta.selectionStart !== ta.selectionEnd) return close();
-  const comp = core.completionAt(ta.value, ta.selectionStart);
+  const comp = core.completionFor(ta.value, ta.selectionStart, enabled()); // 꺼진 종류의 자리면 null: 라우트를 부르지 않는다
   if (!comp || (comp.kind === "tag" && comp.query.trim() === "")) return close();
   const seq = ++S.seq;
   let items = [];
@@ -314,7 +321,8 @@ async function query() {
   }
   if (seq !== S.seq || ta !== S.ta) return; // 그 사이 다시 쳤다
   // 늦게 온 응답: 받는 동안 다른 곳을 눌렀거나 커서를 옮겼으면 그 자리의 목록이 아니다(검토 1번)
-  if (!core.completionStillValid(comp, ta.value, ta.selectionStart, ta.selectionEnd)) return close();
+  // 그 사이 그 종류를 껐어도 그리지 않는다
+  if (!core.completionStillValid(comp, ta.value, ta.selectionStart, ta.selectionEnd, enabled())) return close();
   S.comp = comp;
   S.items = items;
   S.status = status;
@@ -323,6 +331,7 @@ async function query() {
 }
 
 function schedule() {
+  if (!anyEnabled()) return close();
   clearTimeout(S.timer);
   S.timer = setTimeout(query, DEBOUNCE);
 }
@@ -331,7 +340,7 @@ function schedule() {
 function pick(it = S.items[S.sel], comp = S.comp) {
   const { ta, node } = S;
   if (!it || !ta || !comp) return false;
-  if (!core.completionStillValid(comp, ta.value, ta.selectionStart, ta.selectionEnd)) {
+  if (!core.completionStillValid(comp, ta.value, ta.selectionStart, ta.selectionEnd, enabled())) {
     close();
     return false;
   }
@@ -366,6 +375,10 @@ document.addEventListener(
     if (!node) return;
     refreshInfoSoon(node);
     if (S.suppress) return;
+    if (!anyEnabled()) { // 둘 다 끔: 입력에 끼어들지 않는다(다른 자동완성 확장이 그 자리를 쓴다)
+      if (isOpen()) close();
+      return;
+    }
     S.seq++; // 나간 요청의 응답은 버린다(새로 친 글자로 다시 찾는다)
     S.ta = e.target;
     S.node = node;
@@ -378,6 +391,8 @@ document.addEventListener(
   "keydown",
   (e) => {
     if (!S.ta || e.target !== S.ta || !isOpen()) return;
+    // 꺼진 종류의 목록이면(설정을 바꾼 직후) 닫기만 하고 키는 그대로 둔다: preventDefault하지 않으므로 Enter는 줄바꿈 등 원래 동작
+    if (S.comp && !core.kindEnabled(S.comp.kind, enabled())) return close();
     if (e.isComposing || e.keyCode === 229) return; // 한글 조합 중의 키는 입력기 것이다
     const k = e.key;
     if (k === "Escape") {
@@ -388,10 +403,13 @@ document.addEventListener(
     }
     if (["ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"].includes(k)) return close();
     if (!S.items.length || !["ArrowUp", "ArrowDown", "Enter", "Tab"].includes(k) || e.shiftKey || e.ctrlKey || e.altKey || e.metaKey) return;
-    if (!core.completionStillValid(S.comp, S.ta.value, S.ta.selectionStart, S.ta.selectionEnd)) {
+    if (!core.completionStillValid(S.comp, S.ta.value, S.ta.selectionStart, S.ta.selectionEnd, enabled())) {
       // 목록이 지금 자리의 것이 아니다(더 쳤는데 새 목록이 아직 안 옴). 옛 1순위를 넣지 않는다
       close();
-      if (k === "Enter" || k === "Tab") {
+      // 지금 자리가 켜진 종류의 자리일 때만 키를 삼키고 다시 찾는다. 꺼진 종류의 자리(예: 와일드카드를 끈 채 ${)나
+      // 자동완성 자리가 아니면 키를 그대로 둔다(Enter는 줄바꿈)
+      const now = core.completionFor(S.ta.value, S.ta.selectionStart, enabled());
+      if (now && !(now.kind === "tag" && now.query.trim() === "") && (k === "Enter" || k === "Tab")) {
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
@@ -422,7 +440,7 @@ document.addEventListener("compositionend", (e) => {
 // 칸 안을 눌러 커서를 옮겼으면 그 자리의 목록이 아니므로 닫는다
 document.addEventListener("click", (e) => {
   if (e.target !== S.ta || !isOpen() || !S.comp) return;
-  if (!core.completionStillValid(S.comp, S.ta.value, S.ta.selectionStart, S.ta.selectionEnd)) close();
+  if (!core.completionStillValid(S.comp, S.ta.value, S.ta.selectionStart, S.ta.selectionEnd, enabled())) close();
 }, true);
 
 // 칸 밖을 누르거나 어디든 스크롤하면 닫는다(목록 안 스크롤은 빼고)
@@ -470,6 +488,11 @@ app.registerExtension({
     };
   },
   setup() {
+    // 설정을 바꾼 직후(wakaaka.js의 onChange): 떠 있는 목록이 꺼진 종류면 닫고, 정보 줄의 안내를 다시 쓴다
+    window.addEventListener("wakaaka-autocomplete-settings", () => {
+      if (isOpen() && (!S.comp || !core.kindEnabled(S.comp.kind, enabled()))) close();
+      for (const node of currentGraph()?._nodes ?? []) if (node.wakaakaInfo) refreshInfo(node);
+    });
     api.addEventListener("wakaaka.text", ({ detail }) => {
       const node = findNode(detail?.node);
       if (!node) return;

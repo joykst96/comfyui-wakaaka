@@ -3,7 +3,6 @@
 import asyncio
 import logging
 import os
-import threading
 
 import folder_paths
 from aiohttp import web
@@ -15,6 +14,7 @@ from .wakaaka_node.cache import Cache
 from .wakaaka_node.fill import Prefetcher, fill
 from .wakaaka_node.ids import extract_id
 from .wakaaka_node.tagindex import QueryError
+from .wakaaka_node import tagupdate
 from .wakaaka_node.tagupdate import TagIndex
 from .wakaaka_node.node import NODE_CLASS_MAPPINGS, NODE_DISPLAY_NAME_MAPPINGS, RUN_TOKEN, WakaakaText, WakaakaWildcard
 from .wakaaka_node.text import fill_text
@@ -51,8 +51,9 @@ def _client():
 CACHE = Cache(_cache_root())
 PREFETCH = Prefetcher(CACHE, _client)
 # 태그 인덱스(DESIGN 8절): 로딩 때 백그라운드로 한 번 최신 확인. 실패해도 기존 인덱스를 쓰고 시작을 막지 않는다.
+# 태그 자동완성이 꺼져 있으면(default 사용자의 설정) 확인하지 않고, 켠 뒤 첫 검색 요청에서 시작한다.
 TAGS = TagIndex(os.path.join(_data_root(), "tags"))
-threading.Thread(target=TAGS.refresh, name="wakaaka-tags", daemon=True).start()
+tagupdate.on_load(TAGS, _settings())
 
 
 def _fill_node(wildcard, seed, follow_latest, lock):
@@ -111,6 +112,7 @@ async def _tags_suggest(request):
     """태그 자동완성. 서버 /api/tags/suggest와 같은 규칙·응답(`{tags:[…]}`, 최대 20개). 검색은 스레드에서 한다."""
     if "q" not in request.query:
         return web.json_response({"error": {"code": "E_QUERY", "message": "query does not match the schema"}}, status=400)
+    TAGS.start_refresh()  # 로딩 때 꺼져 있어 확인하지 않았으면 지금 한 번 시작한다(이미 시작했으면 아무것도 안 함)
     try:
         r = await asyncio.get_running_loop().run_in_executor(None, TAGS.suggest, request.query["q"])
     except QueryError as e:

@@ -609,6 +609,38 @@ class SettingsKeys(unittest.TestCase):
             s = load(p)
             self.assertEqual((s.user, s.artist_at, s.mode, s.url), ("wakaaka", True, "local", "https://wakaaka.baepoyong.com"))
 
+    def test_autocomplete_toggles(self):
+        # 기본 켜짐(web/wakaaka.js와 같다), 둘은 서로 독립, 불리언 false일 때만 끈다
+        s = Settings()
+        self.assertEqual((s.tag_autocomplete, s.wildcard_autocomplete), (True, True))
+
+        def read(data):
+            with tempfile.TemporaryDirectory() as d:
+                p = d + "/s.json"
+                with open(p, "w", encoding="utf-8") as f:
+                    json.dump(data, f)
+                s = load(p)
+            return s.tag_autocomplete, s.wildcard_autocomplete
+
+        self.assertEqual(read({}), (True, True))  # 기본값은 바꾸기 전까지 파일에 없다
+        self.assertEqual(read({"Wakaaka.TagAutocomplete": False}), (False, True))
+        self.assertEqual(read({"Wakaaka.WildcardAutocomplete": False}), (True, False))
+        self.assertEqual(read({"Wakaaka.TagAutocomplete": False, "Wakaaka.WildcardAutocomplete": False}), (False, False))
+        self.assertEqual(read({"Wakaaka.TagAutocomplete": True, "Wakaaka.WildcardAutocomplete": True}), (True, True))
+        for bad in ["false", 0, None, [], {}, "off"]:  # 틀린 값은 기본값(켜짐)
+            self.assertEqual(read({"Wakaaka.TagAutocomplete": bad, "Wakaaka.WildcardAutocomplete": bad}), (True, True), repr(bad))
+        self.assertEqual(load("/없는/파일.json").tag_autocomplete, True)
+
+
+class ToggleDoesNotChangeExpansion(Base):
+    def test_hand_typed_names_still_resolve(self):
+        # 와일드카드 자동완성을 꺼도 손으로 친 ${이름}은 큐에 넣을 때 유저 목록·refs로 찾는다(끄는 것은 목록뿐)
+        on = self.fill("${hair}, ${Eyes}", 3)
+        for tag, wc in [(True, False), (False, True), (False, False)]:
+            s = Settings("server", self.srv.url, "mine", tag_autocomplete=tag, wildcard_autocomplete=wc)
+            r = self.fill("${hair}, ${Eyes}", 3, settings=s)
+            self.assertEqual((r.text, r.refs, r.lock), (on.text, on.refs, on.lock), (tag, wc))
+
 
 if __name__ == "__main__":
     unittest.main()

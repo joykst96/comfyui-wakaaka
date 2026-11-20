@@ -321,3 +321,70 @@ describe("completionStillValid: 응답을 그리거나 고르기 직전에 자�
     assert.equal(sameCompletion(null, c), false);
   });
 });
+
+import { completionFor, kindEnabled } from "../../web/lib/textcore.js";
+
+describe("completionFor: 종류별 켜고 끄기 (DESIGN 8절 \"켜고 끄기\")", () => {
+  // 자리마다 completionAt이 내는 종류: 태그 자리, ${ 자리, ${ 뒤 쉼표(여전히 ${ 안), 아무것도 아닌 자리, 주석 줄
+  const spots = {
+    tag: "1girl, long h|^",
+    tagStart: "lo|^",
+    ref: "1girl, ${가족|^",
+    refAfterComma: "a, ${x, y|^",
+    choiceTag: "{a|bl|^",
+    none: "1girl,|^",
+    comment: "# a, b|^",
+    closedRef: "${가족}|^",
+  };
+  const COMBOS = {
+    "켬/켬": { tag: true, wildcard: true },
+    "태그만": { tag: true, wildcard: false },
+    "와일드카드만": { tag: false, wildcard: true },
+    "둘 다 끔": { tag: false, wildcard: false },
+  };
+  const at = (s, en) => completionFor(s.replace("|^", ""), s.indexOf("|^"), en)?.kind ?? null;
+  const all = (s) => completionAt(s.replace("|^", ""), s.indexOf("|^"))?.kind ?? null;
+  const want = {
+    "켬/켬": { tag: "tag", tagStart: "tag", ref: "ref", refAfterComma: "ref", choiceTag: "tag", none: null, comment: null, closedRef: null },
+    "태그만": { tag: "tag", tagStart: "tag", ref: null, refAfterComma: null, choiceTag: "tag", none: null, comment: null, closedRef: null },
+    "와일드카드만": { tag: null, tagStart: null, ref: "ref", refAfterComma: "ref", choiceTag: null, none: null, comment: null, closedRef: null },
+    "둘 다 끔": { tag: null, tagStart: null, ref: null, refAfterComma: null, choiceTag: null, none: null, comment: null, closedRef: null },
+  };
+  for (const [name, en] of Object.entries(COMBOS)) {
+    test(name, () => {
+      for (const [k, s] of Object.entries(spots)) assert.equal(at(s, en), want[name][k], `${name} ${k}`);
+    });
+  }
+  test("켬/켬은 completionAt과 같다(기존 동작 그대로)", () => {
+    for (const s of Object.values(spots)) assert.deepEqual(completionFor(s.replace("|^", ""), s.indexOf("|^")), completionAt(s.replace("|^", ""), s.indexOf("|^")));
+    for (const s of Object.values(spots)) assert.equal(at(s, COMBOS["켬/켬"]), all(s));
+  });
+  test("와일드카드를 끄면 ${ 자리에 태그 목록을 대신 띄우지 않는다", () => {
+    // ${ 안의 글자는 태그 조각으로도 읽힐 수 있지만 그 자리는 null이어야 한다
+    for (const s of ["${long h|^", "a, ${blue|^", "{x|${hai|^"]) {
+      assert.equal(all(s), "ref", s);
+      assert.equal(at(s, COMBOS["태그만"]), null, s);
+    }
+  });
+  test("여러 줄: 줄마다 따로", () => {
+    const text = "${가족\nlong h";
+    assert.equal(completionFor(text, 4, COMBOS["태그만"]), null);
+    assert.equal(completionFor(text, text.length, COMBOS["태그만"]).kind, "tag");
+    assert.equal(completionFor(text, text.length, COMBOS["와일드카드만"]), null);
+    assert.equal(completionFor(text, 4, COMBOS["와일드카드만"]).kind, "ref");
+  });
+  test("completionStillValid: 응답이 오는 사이 그 종류를 껐으면 그리지 않는다", () => {
+    const text = "1girl, ${fo";
+    const comp = completionAt(text, text.length);
+    assert.equal(completionStillValid(comp, text, text.length, text.length, COMBOS["켬/켬"]), true);
+    assert.equal(completionStillValid(comp, text, text.length, text.length, COMBOS["태그만"]), false);
+    assert.equal(completionStillValid(comp, text, text.length, text.length, COMBOS["둘 다 끔"]), false);
+    assert.equal(completionStillValid(comp, text, text.length, text.length), true); // 넷째 인자 없으면 켬/켬
+  });
+  test("kindEnabled: 틀린 값은 켜짐(기본값)", () => {
+    assert.equal(kindEnabled("tag", { tag: undefined, wildcard: false }), true);
+    assert.equal(kindEnabled("ref", { tag: false, wildcard: null }), true);
+    assert.equal(kindEnabled("ref", { wildcard: false }), false);
+    assert.equal(kindEnabled("other"), false);
+  });
+});

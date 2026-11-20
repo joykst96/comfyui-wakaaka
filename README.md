@@ -69,9 +69,9 @@ New-Item -ItemType Junction -Path <ComfyUI>\custom_nodes\comfyui-wakaaka -Target
 
 ## 설정 (ComfyUI 설정 → Wakaaka)
 
-전개 모드, 서버 주소, 유저 아이디는 노드 위젯이 아니라 ComfyUI 설정 창에 있다. 두 모드는 결과가 같아서 워크플로마다 다르게 둘 이유가 없기 때문이다.
+전개 모드, 서버 주소, 유저 아이디, 자동완성 켜고 끄기는 노드 위젯이 아니라 ComfyUI 설정 창에 있다. 두 모드는 결과가 같아서 워크플로마다 다르게 둘 이유가 없기 때문이다.
 
-- 여는 곳: 왼쪽 아래 톱니바퀴(설정) → 왼쪽 목록 아래쪽 "기타"의 **Wakaaka** → "노드" 아래 **전개 모드**, **서버 주소**, **유저 아이디**, **작가 태그 앞에 @**
+- 여는 곳: 왼쪽 아래 톱니바퀴(설정) → 왼쪽 목록 아래쪽 "기타"의 **Wakaaka** → "노드" 아래 **자동완성 (와일드카드)**, **자동완성 (태그)**, **작가 태그 앞에 골뱅이(at) 붙이기**, **유저 아이디**, **서버 주소**, **전개 모드**
 - 설정 창 위쪽 검색에 `wakaaka`나 `전개 모드`를 쳐도 된다.
 
 | 설정 | 기본값 | 내용 |
@@ -79,8 +79,12 @@ New-Item -ItemType Junction -Path <ComfyUI>\custom_nodes\comfyui-wakaaka -Target
 | 전개 모드 `Wakaaka.Mode` | 서버 | 서버: 서버가 전개한 결과(`/api/w/{id}/resolve`)를 받는다. 로컬: 묶음(`/bundle`)을 받아 해시를 확인하고 이 PC에서 전개한다. 결과는 같다 |
 | 서버 주소 `Wakaaka.ServerUrl` | `https://wakaaka.baepoyong.com` | http(s)만. 직접 띄운 서버를 쓰려면 그 주소로 바꾼다 |
 | 유저 아이디 `Wakaaka.UserId` | 빈 값 | Wakaaka Text의 `${` 자동완성과 이름 해석에 쓸 와카아카 아이디 하나(영문·숫자·`_-` 3~32자). 비밀번호는 받지 않는다(모든 와일드카드가 공개). 유저 목록은 60초 캐시 |
-| 작가 태그 앞에 @ `Wakaaka.ArtistAt` | 꺼짐 | 켜면 태그 자동완성에서 작가 태그(분류 1)를 `@이름`으로 넣는다 |
+| 작가 태그 앞에 골뱅이(at) 붙이기 `Wakaaka.ArtistAt` | 꺼짐 | 켜면 태그 자동완성에서 작가 태그(분류 1)를 `@이름`으로 넣는다. 태그 자동완성이 켜져 있을 때만 뜻이 있다 |
+| 자동완성 (태그) `Wakaaka.TagAutocomplete` | 켜짐 | 텍스트 칸의 태그 목록. 다른 자동완성 확장과 함께 쓰면 끈다. 꺼져 있으면 ComfyUI를 띄울 때 태그 인덱스를 확인하지 않는다(아래) |
+| 자동완성 (와일드카드) `Wakaaka.WildcardAutocomplete` | 켜짐 | `${` 뒤의 와일드카드 목록. 꺼도 손으로 친 `${이름}`은 큐에 넣을 때 그대로 찾는다(끄는 것은 목록뿐) |
 
+- 자동완성 두 설정은 서로 따로 켜고 끄며, 바꾸면 새로 고침 없이 바로 적용된다. 꺼진 종류의 자리에서는 목록을 띄우지 않고 ↑↓·Enter·Tab·Esc를 가로채지 않으며 ComfyUI에 묻지도 않는다(Enter는 줄바꿈 그대로). 와일드카드만 끄면 `${` 뒤에서는 아무것도 뜨지 않는다(태그 목록을 대신 띄우지 않음). 둘 다 끄면 텍스트 칸 입력에 전혀 끼어들지 않는다.
+- 설정 창의 항목 이름에는 `@`, `{`, `}`를 쓰지 않는다. 프런트가 이름을 번역 메시지로 읽어서 이 글자가 있으면 그 항목이 설정 창에서 빠진다(1.57.4에서 확인).
 - 큐에 넣을 때의 훅은 누가 넣었는지 모르므로 `default` 사용자의 설정을 쓴다(`--multi-user`에서 사용자마다 다르게 둘 수 없다).
 - Windows에서 `localhost`는 IPv6(`::1`)를 먼저 시도해 서버가 IPv4에서만 들으면 요청마다 약 2초 늦다. 로컬 서버는 `http://127.0.0.1:포트`로 적는다.
 
@@ -94,6 +98,7 @@ New-Item -ItemType Junction -Path <ComfyUI>\custom_nodes\comfyui-wakaaka -Target
 ## 태그 인덱스 (자동완성용)
 
 - ComfyUI가 노드를 로딩할 때 백그라운드에서 Hugging Face [`mengod-hf/danbooru-tags-kr`](https://huggingface.co/datasets/mengod-hf/danbooru-tags-kr)의 최신 통합본(`danbooru-tags-kr-YYYY-MM-DD.csv`)을 확인한다. 파일 목록의 SHA-256이 지금 인덱스와 다를 때만 받아(약 27MB) SQLite 인덱스(약 110MB)로 바꾼다. 형식 검증을 통과해야 바꿔 넣고, 실패하거나 오프라인이면 기존 인덱스를 그대로 쓴다. ComfyUI 시작을 막지 않는다.
+- 태그 자동완성(`Wakaaka.TagAutocomplete`)이 꺼져 있으면(`default` 사용자의 설정) 로딩 때 확인하지 않는다. 이미 만든 인덱스는 지우지 않는다. 설정을 켠 뒤 첫 태그 검색 때 백그라운드로 한 번 확인한다(다시 시작할 필요 없음). `/wakaaka/tags/status`의 `check`가 `off`(꺼져 있어 확인하지 않음) 또는 `started`다.
 - 위치는 `ComfyUI/user/__wakaaka/tags/tags-<SHA-256 앞 16자>.sqlite`(약 110MB, 부분 일치용 FTS5 trigram 포함). 받은 CSV는 변환 뒤 지우고 데이터셋 LICENSE(`LICENSE-danbooru-tags-kr`)를 옆에 둔다.
 - 태그 데이터 출처: Hugging Face [`mengod-hf/danbooru-tags-kr`](https://huggingface.co/datasets/mengod-hf/danbooru-tags-kr). 한국어 번역·설명·분류·키워드는 CC BY-SA 4.0이다(데이터셋 LICENSE). 태그 이름과 포스트 수는 Danbooru에서 온 것이다.
 - 경로: `GET /wakaaka/tags/suggest?q=`(와카아카 서버 `/api/tags/suggest`와 같은 규칙과 응답, 최대 20개), `GET /wakaaka/tags/status`.

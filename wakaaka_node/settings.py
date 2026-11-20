@@ -1,4 +1,4 @@
-"""ComfyUI 설정에서 모드, 서버 주소, 유저 아이디, 작가 태그 @를 읽는다 (DESIGN 8절 "설정").
+"""ComfyUI 설정에서 모드, 서버 주소, 유저 아이디, 작가 태그 @, 자동완성 켜고 끄기를 읽는다 (DESIGN 8절 "설정").
 
 프론트가 `user/<사용자>/comfy.settings.json`에 저장하고, 기본값은 바꾸기 전까지 파일에 없다.
 그래서 기본값은 web/wakaaka.js의 defaultValue와 같게 여기에도 둔다.
@@ -13,6 +13,8 @@ MODE_KEY = "Wakaaka.Mode"
 URL_KEY = "Wakaaka.ServerUrl"
 USER_KEY = "Wakaaka.UserId"
 ARTIST_AT_KEY = "Wakaaka.ArtistAt"
+TAG_AC_KEY = "Wakaaka.TagAutocomplete"
+WILDCARD_AC_KEY = "Wakaaka.WildcardAutocomplete"
 USER_ID = re.compile(r"[A-Za-z0-9_-]{3,32}")  # DESIGN 9절 아이디 규칙
 MODES = ("local", "server")
 DEFAULT_MODE = "server"
@@ -20,7 +22,7 @@ DEFAULT_URL = "https://wakaaka.baepoyong.com"
 
 
 class Settings:
-    def __init__(self, mode=DEFAULT_MODE, url=DEFAULT_URL, user_id="", artist_at=False):
+    def __init__(self, mode=DEFAULT_MODE, url=DEFAULT_URL, user_id="", artist_at=False, tag_autocomplete=True, wildcard_autocomplete=True):
         self.mode = mode if mode in MODES else DEFAULT_MODE
         self.raw_url = url
         self.url = normalize_url(url)  # None이면 설정이 틀렸다
@@ -28,9 +30,12 @@ class Settings:
         u = self.raw_user.strip(" \t\r\n")
         self.user = u if USER_ID.fullmatch(u) else None  # None: 비었거나 형식이 틀림
         self.artist_at = artist_at is True
+        # 기본 켜짐(web/wakaaka.js와 같다). 불리언 false일 때만 끈다: 틀린 값은 기본값으로 본다
+        self.tag_autocomplete = tag_autocomplete is not False
+        self.wildcard_autocomplete = wildcard_autocomplete is not False
 
     def __repr__(self):
-        return f"Settings(mode={self.mode!r}, url={self.url!r}, user={self.user!r}, artist_at={self.artist_at!r})"
+        return f"Settings(mode={self.mode!r}, url={self.url!r}, user={self.user!r}, artist_at={self.artist_at!r}, tag_ac={self.tag_autocomplete!r}, wildcard_ac={self.wildcard_autocomplete!r})"
 
 
 def normalize_url(s):
@@ -61,7 +66,8 @@ def load(settings_path):
         pass
     if not isinstance(data, dict):
         data = {}
-    return Settings(data.get(MODE_KEY, DEFAULT_MODE), data.get(URL_KEY, DEFAULT_URL), data.get(USER_KEY, ""), data.get(ARTIST_AT_KEY, False))
+    return Settings(data.get(MODE_KEY, DEFAULT_MODE), data.get(URL_KEY, DEFAULT_URL), data.get(USER_KEY, ""), data.get(ARTIST_AT_KEY, False),
+                    data.get(TAG_AC_KEY, True), data.get(WILDCARD_AC_KEY, True))
 
 
 def settings_path(user_dir, user="default"):

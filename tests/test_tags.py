@@ -12,6 +12,7 @@ import unittest
 from unittest import mock
 
 from wakaaka_node import tagcsv, tagindex, tagupdate
+from wakaaka_node.settings import Settings
 from wakaaka_node.tagupdate import TagIndex
 
 from .fakeserver import FakeServer
@@ -482,3 +483,90 @@ class NonFormatFailures(unittest.TestCase):
         ti = TagIndex(self.root, base_url=self.hub.url)
         self.assertTrue(ti.refresh().startswith("built"))
         self.assertIn("HTTP 500", ti.status()["licenseError"])
+
+
+class StartOnLoad(unittest.TestCase):
+    """태그 자동완성 끔(DESIGN 8절 "켜고 끄기"): 로딩 때 확인하지 않고, 켠 뒤 첫 검색에서 한 번만 시작한다."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = os.path.join(self.tmp.name, "tags")
+        self.spawned = []
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def spawn(self, target):
+        self.spawned.append(target)
+
+    def test_on_load_follows_setting(self):
+        on = TagIndex(self.root)
+        self.assertTrue(tagupdate.on_load(on, Settings(), self.spawn))
+        self.assertEqual((len(self.spawned), on.status()["check"]), (1, "started"))
+        off = TagIndex(self.root)
+        self.assertFalse(tagupdate.on_load(off, Settings(tag_autocomplete=False), self.spawn))
+        self.assertEqual((len(self.spawned), off.status()["check"]), (1, "off"))
+        # 와일드카드 자동완성은 태그 인덱스와 상관없다
+        self.assertTrue(tagupdate.on_load(TagIndex(self.root), Settings(wildcard_autocomplete=False), self.spawn))
+
+    def test_first_search_starts_once(self):
+        ti = TagIndex(self.root)
+        tagupdate.on_load(ti, Settings(tag_autocomplete=False), self.spawn)
+        self.assertEqual(self.spawned, [])
+        self.assertTrue(ti.start_refresh(self.spawn))  # 켠 뒤 첫 검색(__init__.py의 /wakaaka/tags/suggest)
+        for _ in range(5):
+            self.assertFalse(ti.start_refresh(self.spawn))  # 다음 검색들은 다시 시작하지 않는다
+        self.assertEqual(self.spawned, [ti.refresh])
+        self.assertEqual(ti.status()["check"], "started")
+        ti.skip_refresh()  # 시작한 뒤에는 off로 돌아가지 않는다
+        self.assertEqual(ti.status()["check"], "started")
+
+    def test_concurrent_requests_start_once(self):
+        import threading
+        ti = TagIndex(self.root)
+        ti.skip_refresh()
+        lock = threading.Lock()
+        count = []
+
+        def spawn(target):
+            with lock:
+                count.append(target)
+
+        go = threading.Barrier(16)
+
+        def worker():
+            go.wait()
+            ti.start_refresh(spawn)
+
+        ts = [threading.Thread(target=worker) for _ in range(16)]
+        for t in ts:
+            t.start()
+        for t in ts:
+            t.join()
+        self.assertEqual(len(count), 1)
+
+    @mock.patch.object(tagupdate, "MIN_ROWS", 100)
+    def test_off_keeps_existing_index_and_real_start_works(self):
+        hub = Hub()
+        try:
+            hub.put("danbooru-tags-kr-2026-11-10.csv", make_csv(200))
+            first = TagIndex(self.root, base_url=hub.url)
+            self.assertTrue(first.refresh().startswith("built"))
+            files = sorted(os.listdir(self.root))
+            # 다시 띄웠는데 태그 자동완성이 꺼져 있다: 확인하지 않고(요청 없음) 기존 인덱스는 그대로 쓴다
+            n = len(hub.srv.requests)
+            ti = TagIndex(self.root, base_url=hub.url)
+            tagupdate.on_load(ti, Settings(tag_autocomplete=False))
+            self.assertEqual(len(hub.srv.requests), n)
+            self.assertEqual(sorted(os.listdir(self.root)), files)
+            st = ti.status()
+            self.assertEqual((st["state"], st["check"]), ("ready", "off"))
+            self.assertTrue(ti.suggest("tag 0001")["tags"])
+            # 켠 뒤 첫 검색: 실제 스레드로 한 번 확인한다(같은 파일이라 받지 않음)
+            done = []
+            self.assertTrue(ti.start_refresh(lambda f: done.append(f())))
+            self.assertEqual(len(done), 1)
+            self.assertGreater(len(hub.srv.requests), n)
+            self.assertEqual(ti.status()["check"], "started")
+        finally:
+            hub.close()
